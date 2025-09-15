@@ -37,19 +37,84 @@ const getRandomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)
 // Generate random element from array
 const getRandomElement = (array) => array[Math.floor(Math.random() * array.length)];
 
-// Generate random locations
+// Generate random locations with more realistic data
 const generateLocations = (count) => {
+  // South African cities and their approximate coordinates
+  const cities = [
+    { name: 'Cape Town', lat: -33.9249, lng: 18.4241 },
+    { name: 'Johannesburg', lat: -26.2041, lng: 28.0473 },
+    { name: 'Durban', lat: -29.8587, lng: 31.0218 },
+    { name: 'Pretoria', lat: -25.7461, lng: 28.1881 },
+    { name: 'Port Elizabeth', lat: -33.9608, lng: 25.6022 },
+    { name: 'Bloemfontein', lat: -29.0852, lng: 26.1596 },
+    { name: 'East London', lat: -33.0292, lng: 27.8546 },
+    { name: 'Kimberley', lat: -28.7323, lng: 24.7623 },
+    { name: 'Polokwane', lat: -23.9045, lng: 29.4688 },
+    { name: 'Nelspruit', lat: -25.4753, lng: 30.9694 }
+  ];
+  
+  // Street names
+  const streetNames = [
+    'Main Road', 'Church Street', 'Long Street', 'Adderley Street', 'Oxford Road',
+    'Jan Smuts Avenue', 'Nelson Mandela Boulevard', 'Sandton Drive', 'Rivonia Road',
+    'William Nicol Drive', 'Umhlanga Rocks Drive', 'Florida Road', 'Kloof Street',
+    'Bree Street', 'Commissioner Street', 'West Street', 'Smith Street', 'Victoria Road'
+  ];
+  
+  // Shop types
+  const shopTypes = [
+    'Convenience Store', 'Supermarket', 'Pharmacy', 'Liquor Store', 'Cafe',
+    'Restaurant', 'Clothing Store', 'Electronics Shop', 'Hardware Store',
+    'Bookstore', 'Bakery', 'Butchery', 'Spaza Shop', 'General Dealer'
+  ];
+  
+  // Shop names
+  const shopNames = [
+    'Shoprite', 'Pick n Pay', 'Spar', 'Checkers', 'Woolworths', 'Game',
+    'Clicks', 'Dis-Chem', 'Makro', 'OK Foods', 'U-Save', 'Boxer',
+    'Cambridge Food', 'Food Lover\'s Market', 'Fruit & Veg City'
+  ];
+  
+  // Mall names
+  const mallNames = [
+    'Sandton City', 'Canal Walk', 'Gateway', 'Menlyn Park', 'Eastgate',
+    'V&A Waterfront', 'Mall of Africa', 'Pavilion', 'Cresta', 'Tyger Valley',
+    'Brooklyn Mall', 'Clearwater Mall', 'Rosebank Mall', 'Cavendish Square'
+  ];
+  
   return Array.from({ length: count }, (_, index) => {
-    // Generate random latitude and longitude within South Africa
-    const lat = -33.918861 + (Math.random() * 8);
-    const lng = 18.423300 + (Math.random() * 10);
+    const city = getRandomElement(cities);
+    // Add some randomness to the coordinates to spread locations within the city
+    const lat = city.lat + (Math.random() * 0.1 - 0.05);
+    const lng = city.lng + (Math.random() * 0.1 - 0.05);
+    
+    const locationType = getRandomElement(['Shop', 'Consumer Area', 'Market', 'Mall']);
+    let name, address;
+    
+    switch (locationType) {
+      case 'Shop':
+        name = `${getRandomElement(shopNames)} ${getRandomElement(shopTypes)}`;
+        address = `${getRandomNumber(1, 999)} ${getRandomElement(streetNames)}, ${city.name}`;
+        break;
+      case 'Mall':
+        name = getRandomElement(mallNames);
+        address = `${getRandomElement(streetNames)}, ${city.name}`;
+        break;
+      case 'Market':
+        name = `${city.name} ${['Farmers', 'Weekend', 'Central', 'Community'][Math.floor(Math.random() * 4)]} Market`;
+        address = `${getRandomNumber(1, 999)} ${getRandomElement(streetNames)}, ${city.name}`;
+        break;
+      default: // Consumer Area
+        name = `${city.name} ${['North', 'South', 'East', 'West', 'Central'][Math.floor(Math.random() * 5)]} Area`;
+        address = `${city.name} ${['District', 'Zone', 'Suburb', 'Township'][Math.floor(Math.random() * 4)]}`;
+    }
     
     return {
       id: 10000 + index,
-      name: `Location ${10000 + index}`,
-      address: `${getRandomNumber(1, 999)} Main Street, City ${getRandomNumber(1, 50)}`,
+      name,
+      address,
       geocode: { lat, lng },
-      type: getRandomElement(['Shop', 'Consumer Area', 'Market', 'Mall'])
+      type: locationType
     };
   });
 };
@@ -58,9 +123,9 @@ const generateLocations = (count) => {
 const locations = generateLocations(100);
 
 // Generate agent call cycles
-export const agentCallCycles = Array.from({ length: 20 }, (_, index) => {
+// First, ensure each agent has at least one call cycle
+const agentSpecificCycles = agents.map((agent, index) => {
   const frequency = getRandomElement(Object.values(CYCLE_FREQUENCIES));
-  const agent = getRandomElement(agents);
   const cycleLocations = Array.from({ length: getRandomNumber(3, 8) }, () => getRandomElement(locations));
   const adherenceRate = getRandomNumber(60, 100);
   
@@ -79,6 +144,32 @@ export const agentCallCycles = Array.from({ length: 20 }, (_, index) => {
     notes: `Call cycle for ${agent.name} to visit ${cycleLocations.length} locations`
   };
 });
+
+// Then add some additional random call cycles
+const additionalAgentCycles = Array.from({ length: 10 }, (_, index) => {
+  const frequency = getRandomElement(Object.values(CYCLE_FREQUENCIES));
+  const agent = getRandomElement(agents);
+  const cycleLocations = Array.from({ length: getRandomNumber(3, 8) }, () => getRandomElement(locations));
+  const adherenceRate = getRandomNumber(60, 100);
+  
+  return {
+    id: 8500 + index,
+    name: `${agent.name}'s additional ${frequency} cycle`,
+    frequency,
+    startDate: new Date(),
+    endDate: getRandomFutureDate(frequency),
+    assignedTo: agent.id,
+    assignedBy: agent.teamId ? teams.find(t => t.id === agent.teamId)?.leaderId : null,
+    locations: cycleLocations,
+    adherenceRate,
+    status: adherenceRate < 70 ? CYCLE_STATUS.PENDING : CYCLE_STATUS.ACTIVE,
+    tenantId: agent.tenantId,
+    notes: `Additional call cycle for ${agent.name} to visit ${cycleLocations.length} locations`
+  };
+});
+
+// Combine both sets of call cycles
+export const agentCallCycles = [...agentSpecificCycles, ...additionalAgentCycles];
 
 // Generate team call cycles
 export const teamCallCycles = Array.from({ length: 10 }, (_, index) => {

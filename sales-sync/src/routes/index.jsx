@@ -20,7 +20,7 @@ import HelpPage from '../pages/shared/HelpPage';
 import AgentDashboard from '../pages/agent/AgentDashboard';
 import NewVisitPage from '../pages/agent/NewVisitPage';
 import VisitHistoryPage from '../pages/agent/VisitHistoryPage';
-import AgentGoalsPage from '../pages/agent/GoalsPage';
+import GoalsPage from '../pages/agent/GoalsPage';
 import AgentCallCyclePage from '../pages/agent/CallCyclePage';
 
 // Team Leader pages
@@ -107,7 +107,7 @@ export default function Router() {
         { path: 'dashboard', element: <AgentDashboard /> },
         { path: 'new-visit', element: <NewVisitPage /> },
         { path: 'visit-history', element: <VisitHistoryPage /> },
-        { path: 'goals', element: <AgentGoalsPage /> },
+        { path: 'goals', element: <GoalsPage /> },
         { path: 'call-cycles', element: <AgentCallCyclePage /> },
         { path: 'profile', element: <ProfilePage /> },
         { path: 'notifications', element: <NotificationsPage /> },
