@@ -16,7 +16,6 @@ import {
   getCallCyclesByNationalManager
 } from '../../data';
 import { formatPercentage, formatNumber } from '../../lib/utils';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from "recharts";
 
 const NationalManagerDashboard = () => {
   const { user } = useAuth();

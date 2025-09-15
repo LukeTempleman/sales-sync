@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Badge } from '../../components/ui/badge';
+import Badge from '../../components/ui/badge';
 import { Button } from '../../components/ui/button';
 import { getCallCyclesByAgent, CYCLE_FREQUENCIES, CYCLE_STATUS } from '../../data';
 import { formatDate } from '../../lib/utils';
