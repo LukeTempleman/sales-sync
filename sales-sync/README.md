@@ -237,6 +237,7 @@ sales-sync/
 
 ### Recent Additions
 
+- **Simplified Login Flow**: Streamlined the login process by automatically selecting the default organization and providing a discreet role selector for demo purposes.
 - **Agent Call Cycle Page**: Agents can now view their assigned call cycles, filter by frequency and status, and see detailed location information for each cycle.
 - **Admin Goal Management Page**: Admins can now create, edit, and manage goals for all users across the platform, with filtering by goal type, status, and assignee.
 - **Enhanced Location Data**: Call cycles now include realistic South African locations with proper geocoding, addresses, and location types.
@@ -267,11 +268,13 @@ Builds the app for production to the `build` folder.
 1. Clone the repository
 2. Install dependencies with `npm install`
 3. Start the development server with `npm start`
-4. Select a tenant and log in with one of the demo accounts
-   - Agent: agent@example.com
-   - Team Leader: teamleader@example.com
-   - Area Manager: areamanager@example.com
-   - Regional Manager: regionalmanager@example.com
-   - National Manager: nationalmanager@example.com
-   - Admin: admin@example.com
-   - Password: password (for all accounts)
+4. On the login page, you can:
+   - Use the "Demo Login" dropdown in the top-right corner to quickly access any role
+   - Or log in manually with one of the demo accounts:
+     - Agent: agent@example.com
+     - Team Leader: teamleader@example.com
+     - Area Manager: areamanager@example.com
+     - Regional Manager: regionalmanager@example.com
+     - National Manager: nationalmanager@example.com
+     - Admin: admin@example.com
+     - Password: password (for all accounts)
