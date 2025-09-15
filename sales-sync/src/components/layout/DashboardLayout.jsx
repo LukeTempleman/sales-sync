@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { ROLES } from '../../data';
 import { 
   Home, 
@@ -18,11 +19,14 @@ import {
   X,
   Package,
   FileText,
-  Settings
+  Settings,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 const DashboardLayout = () => {
   const { user, tenant, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -116,46 +120,57 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar toggle */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white shadow-sm p-4 flex items-center justify-between">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-card shadow-sm p-4 flex items-center justify-between">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 rounded-md text-gray-500 hover:text-gray-600 focus:outline-none"
+          className="p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none"
         >
           {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
         <div className="flex items-center">
-          <span className="font-semibold text-blue-600">Sales-sync</span>
+          <span className="font-semibold text-primary">Sales-sync</span>
         </div>
-        <div className="w-6 h-6"></div> {/* Spacer for alignment */}
+        <button
+          onClick={toggleTheme}
+          className="p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none"
+        >
+          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
       </div>
 
       {/* Sidebar */}
       <div 
-        className={`fixed inset-y-0 left-0 z-20 w-64 bg-white shadow-lg transform ${
+        className={`fixed inset-y-0 left-0 z-20 w-64 bg-card shadow-lg transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0 transition-transform duration-300 ease-in-out`}
       >
         <div className="flex flex-col h-full">
           {/* Sidebar header */}
           <div className="p-4 border-b">
-            <div className="flex items-center justify-center">
-              <h1 className="text-xl font-bold text-blue-600">Sales-sync</h1>
+            <div className="flex items-center justify-between">
+              <h1 className="text-xl font-bold text-primary">Sales-sync</h1>
+              <button
+                onClick={toggleTheme}
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground focus:outline-none"
+              >
+                {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
             </div>
             <div className="mt-4">
               <div className="flex items-center">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <span className="text-primary font-semibold">
                     {user?.name?.charAt(0) || 'U'}
                   </span>
                 </div>
                 <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-700">{user?.name}</p>
-                  <p className="text-xs text-gray-500">{formatRole(user?.role)}</p>
+                  <p className="text-sm font-medium text-foreground">{user?.name}</p>
+                  <p className="text-xs text-muted-foreground">{formatRole(user?.role)}</p>
                 </div>
               </div>
-              <div className="mt-2 text-xs text-gray-500">
+              <div className="mt-2 text-xs text-muted-foreground">
                 <p>Tenant: {tenant?.name}</p>
               </div>
             </div>
@@ -170,8 +185,8 @@ const DashboardLayout = () => {
                     to={item.path}
                     className={`flex items-center px-3 py-2 rounded-md text-sm ${
                       location.pathname === item.path
-                        ? 'bg-blue-50 text-blue-600'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-foreground hover:bg-muted'
                     }`}
                     onClick={() => setSidebarOpen(false)}
                   >
@@ -182,8 +197,8 @@ const DashboardLayout = () => {
               ))}
             </ul>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            <div className="mt-6 pt-6 border-t border-border">
+              <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Account
               </h3>
               <ul className="mt-2 space-y-1">
@@ -193,8 +208,8 @@ const DashboardLayout = () => {
                       to={item.path.replace('{role}', getBasePath())}
                       className={`flex items-center px-3 py-2 rounded-md text-sm ${
                         location.pathname === item.path.replace('{role}', getBasePath())
-                          ? 'bg-blue-50 text-blue-600'
-                          : 'text-gray-700 hover:bg-gray-100'
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-foreground hover:bg-muted'
                       }`}
                       onClick={() => setSidebarOpen(false)}
                     >
@@ -206,7 +221,7 @@ const DashboardLayout = () => {
                 <li>
                   <button
                     onClick={handleLogout}
-                    className="w-full flex items-center px-3 py-2 rounded-md text-sm text-gray-700 hover:bg-gray-100"
+                    className="w-full flex items-center px-3 py-2 rounded-md text-sm text-foreground hover:bg-muted"
                   >
                     <LogOut className="w-5 h-5" />
                     <span className="ml-3">Logout</span>
@@ -228,7 +243,7 @@ const DashboardLayout = () => {
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 z-10 bg-gray-600 bg-opacity-50 lg:hidden"
+          className="fixed inset-0 z-10 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         ></div>
       )}

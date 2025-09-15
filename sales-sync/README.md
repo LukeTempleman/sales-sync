@@ -9,6 +9,7 @@
   - Professional, clean, modern aesthetic
   - Grid-based layouts, card components, clear spacing
   - Minimalist typography with strong hierarchy
+  - Dark mode support for improved accessibility and user preference
 
 ## 2. Platform Overview
 
@@ -218,12 +219,14 @@ sales-sync/
 - **Role-based Access Control**: Different dashboards and features based on user roles
 - **Authentication**: Login/logout functionality with role-based redirection
 - **Responsive Design**: Mobile-friendly interface that works on all device sizes
+- **Dark Mode**: Toggle between light and dark themes for better accessibility and user preference
 - **Dashboard Analytics**: Data visualization for KPIs and performance metrics
 - **Visit Management**: Create, view, and manage field visits
 - **Goal Tracking**: Monitor progress on assigned goals
 - **Profile Management**: View and edit user profile information
 - **Notifications**: System notifications for goals, call cycles, etc.
 - **Help Center**: Documentation, FAQs, and support resources
+- **Quick Login**: Demo functionality to easily switch between different user roles
 
 ### Available Scripts
 

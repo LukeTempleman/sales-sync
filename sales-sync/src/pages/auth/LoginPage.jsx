@@ -89,6 +89,37 @@ const LoginPage = () => {
     if (user) {
       setEmail(user.email);
       setPassword('password'); // Dummy password for demo
+      
+      // Automatically log in with the selected role
+      setTimeout(() => {
+        const result = login(user.email, 'password', tenant.id);
+        
+        if (result.success) {
+          // Redirect based on user role
+          switch (result.user.role) {
+            case ROLES.AGENT:
+              navigate('/agent/dashboard');
+              break;
+            case ROLES.TEAM_LEADER:
+              navigate('/team-leader/dashboard');
+              break;
+            case ROLES.AREA_MANAGER:
+              navigate('/area-manager/dashboard');
+              break;
+            case ROLES.REGIONAL_MANAGER:
+              navigate('/regional-manager/dashboard');
+              break;
+            case ROLES.NATIONAL_MANAGER:
+              navigate('/national-manager/dashboard');
+              break;
+            case ROLES.ADMIN:
+              navigate('/admin/dashboard');
+              break;
+            default:
+              navigate('/dashboard');
+          }
+        }
+      }, 100);
     }
   };
 
