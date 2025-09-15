@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
-import { ROLES, agents, teamLeaders, areaManagers, regionalManagers, nationalManagers, admins } from '../../data';
+import { ROLES, agents, teamLeaders, areaManagers, regionalManagers, nationalManagers, admins, tenants } from '../../data';
 
 const LoginPage = () => {
-  const { login, tenant } = useAuth();
+  const { login, tenant, selectTenant } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  // Auto-select the first tenant if none is selected
+  useEffect(() => {
+    if (!tenant && tenants.length > 0) {
+      selectTenant(tenants[0].id);
+    }
+  }, [tenant, selectTenant]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -127,29 +134,12 @@ const LoginPage = () => {
     <div>
       <h2 className="text-2xl font-bold mb-6 text-center">Login to Sales-sync</h2>
       
-      {tenant ? (
+      {tenant && (
         <div className="mb-6 text-center">
-          <div className="inline-flex items-center bg-gray-100 rounded-full px-3 py-1">
-            <span className="text-sm text-gray-600 mr-2">Organization:</span>
+          <div className="inline-flex items-center bg-muted rounded-full px-3 py-1">
+            <span className="text-sm text-muted-foreground mr-2">Organization:</span>
             <span className="text-sm font-medium">{tenant.name}</span>
           </div>
-          <div className="mt-2">
-            <Link 
-              to="/select-tenant" 
-              className="text-xs text-blue-600 hover:underline"
-            >
-              Change organization
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="mb-6 text-center">
-          <Link 
-            to="/select-tenant" 
-            className="inline-block bg-blue-50 text-blue-600 rounded-full px-4 py-2 text-sm font-medium"
-          >
-            Select your organization
-          </Link>
         </div>
       )}
 
@@ -159,89 +149,108 @@ const LoginPage = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="your.email@example.com"
-            required
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            required
-          />
-        </div>
-        <div className="flex justify-end">
-          <a href="#" className="text-sm text-blue-600 hover:underline">
-            Forgot password?
-          </a>
-        </div>
-        <Button type="submit" className="w-full" disabled={loading || !tenant}>
-          {loading ? 'Logging in...' : 'Login'}
-        </Button>
-      </form>
-
       {/* Quick login section for demo purposes */}
       {tenant && (
-        <div className="mt-8 border-t pt-6">
-          <h3 className="text-sm font-medium text-gray-500 mb-3">Demo Quick Login</h3>
-          <div className="grid grid-cols-2 gap-2">
+        <div className="mb-8">
+          <h3 className="text-lg font-medium mb-4 text-center">Select Your Role</h3>
+          <div className="grid grid-cols-2 gap-3">
             <Button 
-              variant="outline" 
-              size="sm" 
+              variant="default" 
+              size="lg" 
+              className="h-16 flex flex-col items-center justify-center"
               onClick={() => quickLogin(ROLES.AGENT)}
             >
-              Login as Agent
+              <span className="text-base">Agent</span>
+              <span className="text-xs opacity-70">Field visits, surveys</span>
             </Button>
             <Button 
-              variant="outline" 
-              size="sm" 
+              variant="default" 
+              size="lg" 
+              className="h-16 flex flex-col items-center justify-center"
               onClick={() => quickLogin(ROLES.TEAM_LEADER)}
             >
-              Login as Team Leader
+              <span className="text-base">Team Leader</span>
+              <span className="text-xs opacity-70">Manage agents</span>
             </Button>
             <Button 
-              variant="outline" 
-              size="sm" 
+              variant="default" 
+              size="lg" 
+              className="h-16 flex flex-col items-center justify-center"
               onClick={() => quickLogin(ROLES.AREA_MANAGER)}
             >
-              Login as Area Manager
+              <span className="text-base">Area Manager</span>
+              <span className="text-xs opacity-70">Manage teams</span>
             </Button>
             <Button 
-              variant="outline" 
-              size="sm" 
+              variant="default" 
+              size="lg" 
+              className="h-16 flex flex-col items-center justify-center"
               onClick={() => quickLogin(ROLES.REGIONAL_MANAGER)}
             >
-              Login as Regional Manager
+              <span className="text-base">Regional Manager</span>
+              <span className="text-xs opacity-70">Manage areas</span>
             </Button>
             <Button 
-              variant="outline" 
-              size="sm" 
+              variant="default" 
+              size="lg" 
+              className="h-16 flex flex-col items-center justify-center"
               onClick={() => quickLogin(ROLES.NATIONAL_MANAGER)}
             >
-              Login as National Manager
+              <span className="text-base">National Manager</span>
+              <span className="text-xs opacity-70">Manage regions</span>
             </Button>
             <Button 
-              variant="outline" 
-              size="sm" 
+              variant="default" 
+              size="lg" 
+              className="h-16 flex flex-col items-center justify-center"
               onClick={() => quickLogin(ROLES.ADMIN)}
             >
-              Login as Admin
+              <span className="text-base">Admin</span>
+              <span className="text-xs opacity-70">System management</span>
             </Button>
           </div>
         </div>
       )}
+      
+      <div className="mt-8 border-t pt-6">
+        <details className="text-center">
+          <summary className="cursor-pointer text-sm text-muted-foreground hover:text-primary inline-block">
+            Manual Login
+          </summary>
+          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your.email@example.com"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <div className="flex justify-end">
+              <a href="#" className="text-sm text-primary hover:underline">
+                Forgot password?
+              </a>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading || !tenant}>
+              {loading ? 'Logging in...' : 'Login'}
+            </Button>
+          </form>
+        </details>
+      </div>
     </div>
   );
 };

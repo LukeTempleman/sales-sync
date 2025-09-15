@@ -90,7 +90,7 @@ export default function Router() {
       children: [
         { path: '', element: <Navigate to="/login" /> },
         { path: 'login', element: <LoginPage /> },
-        { path: 'select-tenant', element: <TenantSelectPage /> }
+        { path: 'select-tenant', element: <Navigate to="/login" /> }
       ]
     },
     
