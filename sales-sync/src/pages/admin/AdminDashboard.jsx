@@ -79,7 +79,7 @@ const AdminDashboard = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
             <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <p className="text-gray-500 mt-1">Welcome, {user.name}</p>
+            <p className="text-muted-foreground mt-1">Welcome, {user.name}</p>
           </div>
           <div className="mt-4 md:mt-0 flex space-x-2">
             <Button asChild>
@@ -196,7 +196,7 @@ const AdminDashboard = () => {
                           </div>
                           <div>
                             <p className="font-medium">{tenant.name}</p>
-                            <p className="text-xs text-gray-500">{tenant.domain}</p>
+                            <p className="text-xs text-muted-foreground">{tenant.domain}</p>
                           </div>
                         </div>
                       </td>
@@ -211,7 +211,7 @@ const AdminDashboard = () => {
                             ? 'bg-green-100 text-green-800' 
                             : tenant.status === 'pending'
                               ? 'bg-yellow-100 text-yellow-800'
-                              : 'bg-gray-100 text-gray-800'
+                              : 'bg-secondary text-secondary-foreground'
                         }`}>
                           {tenant.status.charAt(0).toUpperCase() + tenant.status.slice(1)}
                         </span>
@@ -250,7 +250,7 @@ const AdminDashboard = () => {
                       )}
                       <div>
                         <p className="font-medium">{brand.name}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-muted-foreground">
                           {brand.tenantCount} tenants • {brand.surveyCount} surveys
                         </p>
                       </div>
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-medium">{survey.name}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-muted-foreground">
                         {survey.type} • {survey.questionCount} questions
                       </p>
                     </div>
@@ -292,7 +292,7 @@ const AdminDashboard = () => {
                         ? 'bg-green-100 text-green-800' 
                         : survey.status === 'draft'
                           ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
+                          : 'bg-secondary text-secondary-foreground'
                     }`}>
                       {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)}
                     </span>
@@ -325,7 +325,7 @@ const AdminDashboard = () => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="space-y-4">
-                <h3 className="text-sm font-medium text-gray-500">Server Status</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">Server Status</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <p className="text-sm">API Server</p>
@@ -349,16 +349,16 @@ const AdminDashboard = () => {
               </div>
               
               <div className="space-y-4">
-                <h3 className="text-sm font-medium text-gray-500">Resource Usage</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">Resource Usage</h3>
                 <div className="space-y-2">
                   <div>
                     <div className="flex justify-between mb-1">
                       <p className="text-sm">CPU</p>
                       <p className="text-sm font-medium">{analytics?.cpuUsage || 0}%</p>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="w-full bg-secondary rounded-full h-2.5">
                       <div 
-                        className="bg-blue-600 h-2.5 rounded-full" 
+                        className="bg-primary h-2.5 rounded-full" 
                         style={{ width: `${analytics?.cpuUsage || 0}%` }}
                       ></div>
                     </div>
@@ -368,9 +368,9 @@ const AdminDashboard = () => {
                       <p className="text-sm">Memory</p>
                       <p className="text-sm font-medium">{analytics?.memoryUsage || 0}%</p>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="w-full bg-secondary rounded-full h-2.5">
                       <div 
-                        className="bg-blue-600 h-2.5 rounded-full" 
+                        className="bg-primary h-2.5 rounded-full" 
                         style={{ width: `${analytics?.memoryUsage || 0}%` }}
                       ></div>
                     </div>
@@ -380,9 +380,9 @@ const AdminDashboard = () => {
                       <p className="text-sm">Disk</p>
                       <p className="text-sm font-medium">{analytics?.diskUsage || 0}%</p>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                    <div className="w-full bg-secondary rounded-full h-2.5">
                       <div 
-                        className="bg-blue-600 h-2.5 rounded-full" 
+                        className="bg-primary h-2.5 rounded-full" 
                         style={{ width: `${analytics?.diskUsage || 0}%` }}
                       ></div>
                     </div>
@@ -391,7 +391,7 @@ const AdminDashboard = () => {
               </div>
               
               <div className="space-y-4">
-                <h3 className="text-sm font-medium text-gray-500">Recent Events</h3>
+                <h3 className="text-sm font-medium text-muted-foreground">Recent Events</h3>
                 <div className="space-y-2">
                   {analytics?.recentEvents?.map((event, index) => (
                     <div key={index} className="flex items-start space-x-2">
@@ -404,7 +404,7 @@ const AdminDashboard = () => {
                       }`}></div>
                       <div>
                         <p className="text-sm">{event.message}</p>
-                        <p className="text-xs text-gray-500">{new Date(event.timestamp).toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(event.timestamp).toLocaleString()}</p>
                       </div>
                     </div>
                   ))}

@@ -429,7 +429,28 @@ export const systemAnalytics = Array.from({ length: 3 }, (_, index) => {
     usageTrend: {
       periods: periods.monthly,
       data: periods.monthly.map(() => getRandomNumber(500, 2000))
-    }
+    },
+    userActivity: {
+      periods: periods.daily,
+      data: periods.daily.map(() => getRandomNumber(50, 200))
+    },
+    surveyCompletion: {
+      periods: periods.daily,
+      data: periods.daily.map(() => getRandomNumber(30, 150))
+    },
+    activeUsers: getRandomNumber(500, 1000),
+    activeUsersTrend: {
+      change: getRandomNumber(-5, 15)
+    },
+    surveysCompleted: getRandomNumber(1000, 5000),
+    surveyCompletionTrend: {
+      change: getRandomNumber(-5, 15)
+    },
+    systemUptime: getRandomNumber(98, 100),
+    apiResponseTime: getRandomNumber(50, 200),
+    cpuUsage: getRandomNumber(20, 80),
+    memoryUsage: getRandomNumber(30, 90),
+    diskUsage: getRandomNumber(40, 85)
   };
 });
 

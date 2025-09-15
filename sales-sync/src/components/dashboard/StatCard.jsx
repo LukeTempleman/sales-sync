@@ -12,7 +12,7 @@ const StatCard = ({ title, value, icon, trend, trendValue, className }) => {
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-500">{title}</p>
+            <p className="text-sm font-medium text-muted-foreground">{title}</p>
             <h3 className="text-2xl font-bold mt-1">{value}</h3>
             {trend && trendValue && (
               <p className={`text-xs font-medium mt-1 flex items-center ${trendColor}`}>
@@ -22,7 +22,7 @@ const StatCard = ({ title, value, icon, trend, trendValue, className }) => {
             )}
           </div>
           {icon && (
-            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               {icon}
             </div>
           )}

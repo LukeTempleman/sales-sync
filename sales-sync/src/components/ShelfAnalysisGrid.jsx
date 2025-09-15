@@ -71,7 +71,7 @@ const ShelfAnalysisGrid = ({ imageUrl, onShelfShareCalculated }) => {
           <div
             key={cellId}
             className={`absolute cursor-pointer border border-white/50 ${
-              isSelected ? 'bg-blue-500/50' : 'bg-transparent hover:bg-white/20'
+              isSelected ? 'bg-primary/50' : 'bg-transparent hover:bg-white/20'
             }`}
             style={{
               left: `${col * cellWidth}%`,
@@ -101,7 +101,7 @@ const ShelfAnalysisGrid = ({ imageUrl, onShelfShareCalculated }) => {
           ref={imageRef}
           src={imageUrl}
           alt="Shelf"
-          className="w-full rounded border border-gray-200"
+          className="w-full rounded border border-input"
           onLoad={() => setImageLoaded(true)}
         />
         
@@ -137,14 +137,14 @@ const ShelfAnalysisGrid = ({ imageUrl, onShelfShareCalculated }) => {
       </div>
 
       {gridVisible && (
-        <div className="bg-gray-100 p-3 rounded-md">
+        <div className="bg-muted p-3 rounded-md">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium">Selected:</span>
             <span className="text-sm font-bold">{selectedCells.length} of {gridSize.rows * gridSize.cols} cells</span>
           </div>
           <div className="flex justify-between items-center mt-1">
             <span className="text-sm font-medium">Brand Shelf Share:</span>
-            <span className="text-sm font-bold text-blue-600">
+            <span className="text-sm font-bold text-primary">
               {Math.round((selectedCells.length / (gridSize.rows * gridSize.cols)) * 100)}%
             </span>
           </div>

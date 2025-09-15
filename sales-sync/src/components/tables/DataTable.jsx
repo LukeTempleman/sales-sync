@@ -54,7 +54,7 @@ const DataTable = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-gray-500" />
+          <Search className="h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={searchPlaceholder}
             value={globalFilter ?? ''}
@@ -63,7 +63,7 @@ const DataTable = ({
           />
         </div>
         <div className="flex items-center gap-2">
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-muted-foreground">
             {table.getFilteredRowModel().rows.length} results
           </div>
         </div>
@@ -138,7 +138,7 @@ const DataTable = ({
         </Table>
       </div>
       <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-500">
+        <div className="text-sm text-muted-foreground">
           Page {table.getState().pagination.pageIndex + 1} of{' '}
           {table.getPageCount()}
         </div>
