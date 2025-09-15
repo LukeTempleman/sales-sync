@@ -223,10 +223,18 @@ sales-sync/
 - **Dashboard Analytics**: Data visualization for KPIs and performance metrics
 - **Visit Management**: Create, view, and manage field visits
 - **Goal Tracking**: Monitor progress on assigned goals
+- **Call Cycle Management**: View and manage recurring visit schedules
 - **Profile Management**: View and edit user profile information
 - **Notifications**: System notifications for goals, call cycles, etc.
 - **Help Center**: Documentation, FAQs, and support resources
 - **Quick Login**: Demo functionality to easily switch between different user roles
+
+### Recent Additions
+
+- **Agent Call Cycle Page**: Agents can now view their assigned call cycles, filter by frequency and status, and see detailed location information for each cycle.
+- **Admin Goal Management Page**: Admins can now create, edit, and manage goals for all users across the platform, with filtering by goal type, status, and assignee.
+- **Enhanced Location Data**: Call cycles now include realistic South African locations with proper geocoding, addresses, and location types.
+- **Improved Data Visualization**: Added more detailed charts and graphs for analytics dashboards.
 
 ### Available Scripts
 
