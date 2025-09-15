@@ -10,9 +10,42 @@ export const ROLES = {
 };
 
 export const tenants = [
-  { id: 1, name: 'Acme Corporation', logo: 'https://placehold.co/200x100/blue/white?text=ACME' },
-  { id: 2, name: 'Global Sales Inc.', logo: 'https://placehold.co/200x100/green/white?text=GSI' },
-  { id: 3, name: 'Retail Masters', logo: 'https://placehold.co/200x100/red/white?text=RM' }
+  {
+    id: 1,
+    name: 'Acme Corporation',
+    logo: 'https://placehold.co/200x100/blue/white?text=ACME',
+    domain: 'acme.com',
+    userCount: 120,
+    visitCount: 3400,
+    surveyCount: 15,
+    storageUsed: 512,
+    lastActivity: new Date().toISOString(),
+    status: 'active'
+  },
+  {
+    id: 2,
+    name: 'Global Sales Inc.',
+    logo: 'https://placehold.co/200x100/green/white?text=GSI',
+    domain: 'globalsales.com',
+    userCount: 85,
+    visitCount: 2100,
+    surveyCount: 9,
+    storageUsed: 256,
+    lastActivity: new Date(Date.now() - 86400000).toISOString(),
+    status: 'pending'
+  },
+  {
+    id: 3,
+    name: 'Retail Masters',
+    logo: 'https://placehold.co/200x100/red/white?text=RM',
+    domain: 'retailmasters.com',
+    userCount: 60,
+    visitCount: 1500,
+    surveyCount: 7,
+    storageUsed: 128,
+    lastActivity: new Date(Date.now() - 2 * 86400000).toISOString(),
+    status: 'inactive'
+  }
 ];
 
 // Agents

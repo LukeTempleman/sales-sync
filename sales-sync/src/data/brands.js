@@ -10,13 +10,16 @@ export const BRAND_STATUS = {
 
 // Generate brands
 export const brands = [
+  // Added tenantCount and surveyCount for dashboard compatibility
   {
     id: 1,
     name: 'Goldrush',
     logo: 'https://placehold.co/200x100/gold/black?text=Goldrush',
     description: 'Leading betting platform with nationwide presence',
-    status: BRAND_STATUS.ACTIVE,
-    tenantId: 1,
+  status: BRAND_STATUS.ACTIVE,
+  tenantId: 1,
+  tenantCount: 2,
+  surveyCount: 5,
     infographics: [
       {
         id: 101,
@@ -51,8 +54,10 @@ export const brands = [
     name: 'BetMax',
     logo: 'https://placehold.co/200x100/blue/white?text=BetMax',
     description: 'Premium betting services with exclusive offers',
-    status: BRAND_STATUS.ACTIVE,
-    tenantId: 1,
+  status: BRAND_STATUS.ACTIVE,
+  tenantId: 1,
+  tenantCount: 1,
+  surveyCount: 3,
     infographics: [
       {
         id: 103,
@@ -75,8 +80,10 @@ export const brands = [
     name: 'SportKing',
     logo: 'https://placehold.co/200x100/green/white?text=SportKing',
     description: 'Sports-focused betting platform with live odds',
-    status: BRAND_STATUS.ACTIVE,
-    tenantId: 2,
+  status: BRAND_STATUS.ACTIVE,
+  tenantId: 2,
+  tenantCount: 1,
+  surveyCount: 2,
     infographics: [
       {
         id: 104,
@@ -99,8 +106,10 @@ export const brands = [
     name: 'LuckyBet',
     logo: 'https://placehold.co/200x100/red/white?text=LuckyBet',
     description: 'Casual betting platform with jackpot opportunities',
-    status: BRAND_STATUS.ACTIVE,
-    tenantId: 2,
+  status: BRAND_STATUS.ACTIVE,
+  tenantId: 2,
+  tenantCount: 1,
+  surveyCount: 1,
     infographics: [
       {
         id: 105,
@@ -123,8 +132,10 @@ export const brands = [
     name: 'BetPro',
     logo: 'https://placehold.co/200x100/purple/white?text=BetPro',
     description: 'Professional betting platform for serious bettors',
-    status: BRAND_STATUS.ACTIVE,
-    tenantId: 3,
+  status: BRAND_STATUS.ACTIVE,
+  tenantId: 3,
+  tenantCount: 1,
+  surveyCount: 2,
     infographics: [
       {
         id: 106,
@@ -147,8 +158,10 @@ export const brands = [
     name: 'QuickBet',
     logo: 'https://placehold.co/200x100/orange/black?text=QuickBet',
     description: 'Fast and simple betting platform for casual users',
-    status: BRAND_STATUS.PENDING,
-    tenantId: 3,
+  status: BRAND_STATUS.PENDING,
+  tenantId: 3,
+  tenantCount: 1,
+  surveyCount: 1,
     infographics: [
       {
         id: 107,
