@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
+import { UserCircle2 } from 'lucide-react';
 import { ROLES, agents, teamLeaders, areaManagers, regionalManagers, nationalManagers, admins, tenants } from '../../data';
 
 const LoginPage = () => {
@@ -134,12 +135,13 @@ const LoginPage = () => {
     <div className="relative">
       {/* Demo role selector in the corner */}
       {tenant && (
-        <div className="absolute top-0 right-0">
+        <div className="absolute top-2 right-2 z-10">
           <details className="text-right">
-            <summary className="cursor-pointer text-xs text-muted-foreground hover:text-primary inline-block p-2">
-              Demo: Quick Login
+            <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-primary inline-flex items-center gap-1 px-2 py-1 rounded-md border border-muted hover:border-primary/30 transition-colors">
+              <UserCircle2 className="h-3.5 w-3.5 mr-1" />
+              <span>Demo Login</span>
             </summary>
-            <div className="bg-card border rounded-md shadow-md p-3 mt-1 w-48">
+            <div className="absolute right-0 mt-2 bg-card border rounded-md shadow-md p-3 w-48">
               <h4 className="text-xs font-medium mb-2 text-muted-foreground">Select Role:</h4>
               <div className="space-y-1">
                 <Button 
