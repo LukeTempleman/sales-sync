@@ -1,9 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Users, ShoppingBag, Target, Calendar, ArrowUpRight, UserPlus, BarChart2, Map, TrendingUp, Globe, Building, FileText, Settings } from 'lucide-react';
+import { 
+  Users, 
+  ShoppingBag, 
+  Target, 
+  Calendar, 
+  ArrowUpRight, 
+  UserPlus, 
+  BarChart2, 
+  Map, 
+  TrendingUp, 
+  Globe, 
+  Building, 
+  FileText, 
+  Settings, 
+  PieChart,
+  Activity,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Camera,
+  Store,
+  User,
+  Layers,
+  Clock,
+  Download
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
+import { Badge } from '../../components/ui/badge';
 import StatCard from '../../components/dashboard/StatCard';
 import ChartCard from '../../components/dashboard/ChartCard';
 import { 
@@ -11,29 +39,35 @@ import {
   getTenants,
   getBrands,
   getSurveys,
-  getAllUsers
+  getAllUsers,
+  getSystemAnalytics
 } from '../../data';
-import { formatPercentage, formatNumber } from '../../lib/utils';
+import { formatPercentage, formatNumber, formatDate } from '../../lib/utils';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
   const [analytics, setAnalytics] = useState(null);
+  const [systemAnalytics, setSystemAnalytics] = useState(null);
   const [tenants, setTenants] = useState([]);
   const [brands, setBrands] = useState([]);
   const [surveys, setSurveys] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('week');
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (user) {
       // In a real app, these would be API calls
       const adminAnalytics = getAdminAnalytics();
+      const sysAnalytics = getSystemAnalytics();
       const allTenants = getTenants();
       const allBrands = getBrands();
       const allSurveys = getSurveys();
       const allUsers = getAllUsers();
       
       setAnalytics(adminAnalytics);
+      setSystemAnalytics(sysAnalytics);
       setTenants(allTenants);
       setBrands(allBrands);
       setSurveys(allSurveys);
