@@ -20,7 +20,8 @@ import HelpPage from '../pages/shared/HelpPage';
 import AgentDashboard from '../pages/agent/AgentDashboard';
 import NewVisitPage from '../pages/agent/NewVisitPage';
 import VisitHistoryPage from '../pages/agent/VisitHistoryPage';
-import AgentGoalsPage from '../pages/agent/AgentGoalsPage';
+import AgentGoalsPage from '../pages/agent/GoalsPage';
+import AgentCallCyclePage from '../pages/agent/CallCyclePage';
 
 // Team Leader pages
 import TeamLeaderDashboard from '../pages/team-leader/TeamLeaderDashboard';
@@ -57,6 +58,7 @@ import SurveyManagementPage from '../pages/admin/SurveyManagementPage';
 import UserManagementPage from '../pages/admin/UserManagementPage';
 import AdminVisitHistoryPage from '../pages/admin/AdminVisitHistoryPage';
 import AdminAnalyticsPage from '../pages/admin/AdminAnalyticsPage';
+import GoalManagementPage from '../pages/admin/GoalManagementPage';
 
 // Error pages
 import NotFoundPage from '../pages/NotFoundPage';
@@ -106,6 +108,7 @@ export default function Router() {
         { path: 'new-visit', element: <NewVisitPage /> },
         { path: 'visit-history', element: <VisitHistoryPage /> },
         { path: 'goals', element: <AgentGoalsPage /> },
+        { path: 'call-cycles', element: <AgentCallCyclePage /> },
         { path: 'profile', element: <ProfilePage /> },
         { path: 'notifications', element: <NotificationsPage /> },
         { path: 'help', element: <HelpPage /> }
@@ -210,6 +213,7 @@ export default function Router() {
         { path: 'brand-management', element: <BrandManagementPage /> },
         { path: 'survey-management', element: <SurveyManagementPage /> },
         { path: 'user-management', element: <UserManagementPage /> },
+        { path: 'goal-management', element: <GoalManagementPage /> },
         { path: 'visit-history', element: <AdminVisitHistoryPage /> },
         { path: 'analytics', element: <AdminAnalyticsPage /> },
         { path: 'profile', element: <ProfilePage /> },

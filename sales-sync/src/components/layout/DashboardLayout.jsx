@@ -45,6 +45,7 @@ const DashboardLayout = () => {
           { path: '/agent/new-visit', label: 'New Visit', icon: <PlusCircle className="w-5 h-5" /> },
           { path: '/agent/visit-history', label: 'Visit History', icon: <Clock className="w-5 h-5" /> },
           { path: '/agent/goals', label: 'Goals', icon: <Target className="w-5 h-5" /> },
+          { path: '/agent/call-cycles', label: 'Call Cycles', icon: <Calendar className="w-5 h-5" /> },
         ];
       case ROLES.TEAM_LEADER:
         return [
@@ -84,6 +85,7 @@ const DashboardLayout = () => {
           { path: '/admin/brand-management', label: 'Brands', icon: <Package className="w-5 h-5" /> },
           { path: '/admin/survey-management', label: 'Surveys', icon: <FileText className="w-5 h-5" /> },
           { path: '/admin/user-management', label: 'Users', icon: <Users className="w-5 h-5" /> },
+          { path: '/admin/goal-management', label: 'Goals', icon: <Target className="w-5 h-5" /> },
           { path: '/admin/visit-history', label: 'Visit History', icon: <Clock className="w-5 h-5" /> },
           { path: '/admin/analytics', label: 'Analytics', icon: <BarChart2 className="w-5 h-5" /> },
         ];
