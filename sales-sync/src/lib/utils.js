@@ -56,40 +56,85 @@ export function capitalizeWords(string) {
  * Formats a date string
  */
 export function formatDate(dateString, options = {}) {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    ...options,
-  }).format(date);
+  if (!dateString) {
+    return 'N/A';
+  }
+  
+  try {
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid date';
+    }
+    
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      ...options,
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Error';
+  }
 }
 
 /**
  * Formats a time string
  */
 export function formatTime(dateString) {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-  }).format(date);
+  if (!dateString) {
+    return 'N/A';
+  }
+  
+  try {
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid time';
+    }
+    
+    return new Intl.DateTimeFormat('en-US', {
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return 'Error';
+  }
 }
 
 /**
  * Formats a date and time string
  */
 export function formatDateTime(dateString) {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: true,
-  }).format(date);
+  if (!dateString) {
+    return 'N/A';
+  }
+  
+  try {
+    const date = new Date(dateString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return 'Invalid date/time';
+    }
+    
+    return new Intl.DateTimeFormat('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    }).format(date);
+  } catch (error) {
+    console.error('Error formatting date/time:', error);
+    return 'Error';
+  }
 }
 
 /**
