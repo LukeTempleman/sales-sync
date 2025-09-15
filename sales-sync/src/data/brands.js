@@ -207,3 +207,8 @@ export const getBrandsByStatus = (status) => {
 export const getBrandById = (brandId) => {
   return brands.find(brand => brand.id === brandId);
 };
+
+// Helper function to get all brands
+export const getBrands = () => {
+  return brands;
+};

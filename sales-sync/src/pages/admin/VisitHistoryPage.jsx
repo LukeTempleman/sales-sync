@@ -6,7 +6,7 @@ import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { Badge } from '../../components/ui/badge';
+import { Badge } from '../../components/ui/badge/index';
 import { Separator } from '../../components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import DataTable from '../../components/tables/DataTable';
@@ -51,7 +51,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '../../components/ui/popover';
+} from '../../components/ui/popover/index';
 import { Calendar as CalendarComponent } from '../../components/ui/calendar';
 import { format, subDays, isWithinInterval, parseISO } from 'date-fns';
 
