@@ -103,11 +103,46 @@ const NewVisitPage = () => {
     return { lat: -33.918861 + (Math.random() * 0.1), lng: 18.423300 + (Math.random() * 0.1) };
   };
 
-  // Mock function to take a photo
+  // Function to handle photo selection
   const takePhoto = (fieldName) => {
-    // In a real app, this would use the device camera
-    alert(`Taking photo for ${fieldName}`);
-    return `https://placehold.co/400x300/blue/white?text=${fieldName}`;
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    
+    // Set up the change event handler
+    fileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        // Create a URL for the selected file
+        const photoUrl = URL.createObjectURL(file);
+        
+        // Update the form with the selected photo URL
+        switch(fieldName) {
+          case 'ID Photo':
+            reset({ ...watch(), idPhoto: photoUrl });
+            break;
+          case 'Shelf Photo':
+            reset({ ...watch(), shelfPhoto: photoUrl });
+            break;
+          case 'Exterior Photo':
+            reset({ ...watch(), exteriorPhoto: photoUrl });
+            break;
+          case 'Board Photo':
+            reset({ ...watch(), boardPhoto: photoUrl });
+            break;
+          default:
+            break;
+        }
+      }
+    };
+    
+    // Trigger the file selection dialog
+    fileInput.click();
+    
+    // Return a placeholder URL initially
+    // The actual URL will be set in the onchange handler
+    return null;
   };
 
   // Render different steps based on visit type
@@ -221,20 +256,28 @@ const NewVisitPage = () => {
                       type="button" 
                       variant="outline"
                       onClick={() => {
-                        const photoUrl = takePhoto('ID Photo');
-                        reset({ ...watch(), idPhoto: photoUrl });
+                        takePhoto('ID Photo');
                       }}
                     >
                       <Camera className="h-4 w-4 mr-2" />
-                      Take Photo
+                      Select Photo
                     </Button>
                     {watch('idPhoto') && (
                       <span className="text-sm text-green-600 flex items-center">
                         <Check className="h-4 w-4 mr-1" />
-                        Photo captured
+                        Photo selected
                       </span>
                     )}
                   </div>
+                  {watch('idPhoto') && (
+                    <div className="mt-2">
+                      <img 
+                        src={watch('idPhoto')} 
+                        alt="ID/Passport" 
+                        className="max-h-32 rounded border border-gray-200" 
+                      />
+                    </div>
+                  )}
                   {errors.idPhoto && (
                     <p className="text-sm text-rose-500">{errors.idPhoto.message}</p>
                   )}
@@ -565,20 +608,28 @@ const NewVisitPage = () => {
                       type="button" 
                       variant="outline"
                       onClick={() => {
-                        const photoUrl = takePhoto('Shelf Photo');
-                        reset({ ...watch(), shelfPhoto: photoUrl });
+                        takePhoto('Shelf Photo');
                       }}
                     >
                       <Camera className="h-4 w-4 mr-2" />
-                      Take Photo
+                      Select Photo
                     </Button>
                     {watch('shelfPhoto') && (
                       <span className="text-sm text-green-600 flex items-center">
                         <Check className="h-4 w-4 mr-1" />
-                        Photo captured
+                        Photo selected
                       </span>
                     )}
                   </div>
+                  {watch('shelfPhoto') && (
+                    <div className="mt-2">
+                      <img 
+                        src={watch('shelfPhoto')} 
+                        alt="Shelf" 
+                        className="max-h-32 rounded border border-gray-200" 
+                      />
+                    </div>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -643,20 +694,28 @@ const NewVisitPage = () => {
                       type="button" 
                       variant="outline"
                       onClick={() => {
-                        const photoUrl = takePhoto('Exterior Photo');
-                        reset({ ...watch(), exteriorPhoto: photoUrl });
+                        takePhoto('Exterior Photo');
                       }}
                     >
                       <Camera className="h-4 w-4 mr-2" />
-                      Take Photo
+                      Select Photo
                     </Button>
                     {watch('exteriorPhoto') && (
                       <span className="text-sm text-green-600 flex items-center">
                         <Check className="h-4 w-4 mr-1" />
-                        Photo captured
+                        Photo selected
                       </span>
                     )}
                   </div>
+                  {watch('exteriorPhoto') && (
+                    <div className="mt-2">
+                      <img 
+                        src={watch('exteriorPhoto')} 
+                        alt="Shop Exterior" 
+                        className="max-h-32 rounded border border-gray-200" 
+                      />
+                    </div>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
@@ -666,20 +725,28 @@ const NewVisitPage = () => {
                       type="button" 
                       variant="outline"
                       onClick={() => {
-                        const photoUrl = takePhoto('Board Photo');
-                        reset({ ...watch(), boardPhoto: photoUrl });
+                        takePhoto('Board Photo');
                       }}
                     >
                       <Camera className="h-4 w-4 mr-2" />
-                      Take Photo
+                      Select Photo
                     </Button>
                     {watch('boardPhoto') && (
                       <span className="text-sm text-green-600 flex items-center">
                         <Check className="h-4 w-4 mr-1" />
-                        Photo captured
+                        Photo selected
                       </span>
                     )}
                   </div>
+                  {watch('boardPhoto') && (
+                    <div className="mt-2">
+                      <img 
+                        src={watch('boardPhoto')} 
+                        alt="Advertising Board" 
+                        className="max-h-32 rounded border border-gray-200" 
+                      />
+                    </div>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
