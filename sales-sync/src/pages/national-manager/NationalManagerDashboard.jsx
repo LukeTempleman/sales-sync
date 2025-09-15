@@ -426,4 +426,4 @@ const NationalManagerDashboard = () => {
   );
 };
 
-// Import the ResponsiveContainer and other chart components
+export default NationalManagerDashboard;
