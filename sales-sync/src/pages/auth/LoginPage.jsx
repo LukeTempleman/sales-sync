@@ -133,72 +133,74 @@ const LoginPage = () => {
 
   return (
     <div className="relative">
-      {/* Demo role selector in the corner */}
-      {tenant && (
-        <div className="absolute top-2 right-2 z-10">
-          <details className="text-right">
-            <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-primary inline-flex items-center gap-1 px-2 py-1 rounded-md border border-muted hover:border-primary/30 transition-colors">
-              <UserCircle2 className="h-3.5 w-3.5 mr-1" />
-              <span>Demo Login</span>
-            </summary>
-            <div className="absolute right-0 mt-2 bg-card border rounded-md shadow-md p-3 w-48">
-              <h4 className="text-xs font-medium mb-2 text-muted-foreground">Select Role:</h4>
-              <div className="space-y-1">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-start text-left h-8"
-                  onClick={() => quickLogin(ROLES.AGENT)}
-                >
-                  <span className="text-sm">Agent</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-start text-left h-8"
-                  onClick={() => quickLogin(ROLES.TEAM_LEADER)}
-                >
-                  <span className="text-sm">Team Leader</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-start text-left h-8"
-                  onClick={() => quickLogin(ROLES.AREA_MANAGER)}
-                >
-                  <span className="text-sm">Area Manager</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-start text-left h-8"
-                  onClick={() => quickLogin(ROLES.REGIONAL_MANAGER)}
-                >
-                  <span className="text-sm">Regional Manager</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-start text-left h-8"
-                  onClick={() => quickLogin(ROLES.NATIONAL_MANAGER)}
-                >
-                  <span className="text-sm">National Manager</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="w-full justify-start text-left h-8"
-                  onClick={() => quickLogin(ROLES.ADMIN)}
-                >
-                  <span className="text-sm">Admin</span>
-                </Button>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">Login to Sales-sync</h2>
+        
+        {/* Demo role selector */}
+        {tenant && (
+          <div className="relative">
+            <details className="text-right">
+              <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-primary inline-flex items-center gap-1 px-2 py-1 rounded-md border border-muted hover:border-primary/30 transition-colors">
+                <UserCircle2 className="h-3.5 w-3.5 mr-1" />
+                <span>Demo Login</span>
+              </summary>
+              <div className="absolute right-0 mt-2 bg-card border rounded-md shadow-md p-3 w-48 z-50">
+                <h4 className="text-xs font-medium mb-2 text-muted-foreground">Select Role:</h4>
+                <div className="space-y-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-left h-8"
+                    onClick={() => quickLogin(ROLES.AGENT)}
+                  >
+                    <span className="text-sm">Agent</span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-left h-8"
+                    onClick={() => quickLogin(ROLES.TEAM_LEADER)}
+                  >
+                    <span className="text-sm">Team Leader</span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-left h-8"
+                    onClick={() => quickLogin(ROLES.AREA_MANAGER)}
+                  >
+                    <span className="text-sm">Area Manager</span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-left h-8"
+                    onClick={() => quickLogin(ROLES.REGIONAL_MANAGER)}
+                  >
+                    <span className="text-sm">Regional Manager</span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-left h-8"
+                    onClick={() => quickLogin(ROLES.NATIONAL_MANAGER)}
+                  >
+                    <span className="text-sm">National Manager</span>
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="w-full justify-start text-left h-8"
+                    onClick={() => quickLogin(ROLES.ADMIN)}
+                  >
+                    <span className="text-sm">Admin</span>
+                  </Button>
+                </div>
               </div>
-            </div>
-          </details>
-        </div>
-      )}
-
-      <h2 className="text-2xl font-bold mb-6 text-center">Login to Sales-sync</h2>
+            </details>
+          </div>
+        )}
+      </div>
       
       {tenant && (
         <div className="mb-6 text-center">
