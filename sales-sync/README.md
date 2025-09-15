@@ -4,6 +4,12 @@
 
 - **Frontend Framework**: React
 - **Styling/UI Library**: shadcn/ui
+- **UI Components**: 
+  - Radix UI (@radix-ui/react-tabs, @radix-ui/react-select, etc.)
+  - class-variance-authority (for component variants)
+  - clsx & tailwind-merge (for class name management)
+- **Icons**: Lucide React
+- **Charts**: Recharts
 - **Design Guidelines**:
   - Primary colours: White (backgrounds), Blue (primary actions), Rose (secondary/accents)
   - Professional, clean, modern aesthetic
