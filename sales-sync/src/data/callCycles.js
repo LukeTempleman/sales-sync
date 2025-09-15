@@ -16,6 +16,10 @@ export const CYCLE_STATUS = {
   PENDING: 'pending'
 };
 
+// For backward compatibility
+export const CALL_CYCLE_FREQUENCY = CYCLE_FREQUENCIES;
+export const CALL_CYCLE_STATUS = CYCLE_STATUS;
+
 // Generate random date in the future
 const getRandomFutureDate = (type) => {
   const today = new Date();

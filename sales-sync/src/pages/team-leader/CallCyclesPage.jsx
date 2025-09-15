@@ -1,49 +1,89 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  Calendar, 
+  Plus, 
+  Search, 
+  Filter, 
+  MapPin, 
+  Users, 
+  Clock, 
+  CheckCircle, 
+  AlertCircle, 
+  ChevronDown, 
+  Edit, 
+  Trash2, 
+  Eye,
+  Trash
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { Badge } from '../../components/ui/badge';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '../../components/ui/dropdown-menu';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '../../components/ui/dialog';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '../../components/ui/select';
+import { Separator } from '../../components/ui/separator';
+import { Switch } from '../../components/ui/switch';
+import { Checkbox } from '../../components/ui/checkbox';
 import DataTable from '../../components/tables/DataTable';
 import { 
   getCallCyclesByTeamLeader, 
-  getAgentsByTeamLeader,
-  CALL_CYCLE_FREQUENCY,
-  CALL_CYCLE_STATUS
+  getAgentsByTeamLeader, 
+  CYCLE_FREQUENCIES, 
+  CYCLE_STATUS,
+  locations
 } from '../../data';
 import { formatPercentage, formatDate } from '../../lib/utils';
-import { 
-  Calendar, 
-  Plus, 
-  Edit, 
-  Trash, 
-  MapPin, 
-  Users, 
-  Clock, 
-  CheckCircle,
-  AlertCircle
-} from 'lucide-react';
 
 const CallCyclesPage = () => {
   const { user } = useAuth();
   const [callCycles, setCallCycles] = useState([]);
   const [agents, setAgents] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [frequencyFilter, setFrequencyFilter] = useState('all');
   const [loading, setLoading] = useState(true);
-  const [showAddCycle, setShowAddCycle] = useState(false);
-  const [selectedCycle, setSelectedCycle] = useState(null);
-  const [activeTab, setActiveTab] = useState('all');
-  const [formData, setFormData] = useState({
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [currentCycle, setCurrentCycle] = useState(null);
+  const [newCycle, setNewCycle] = useState({
     name: '',
-    description: '',
-    frequency: CALL_CYCLE_FREQUENCY.WEEKLY,
-    startDate: '',
-    endDate: '',
+    frequency: CYCLE_FREQUENCIES.WEEKLY,
+    assignedTo: '',
     locations: [],
-    assignedAgents: [],
-    status: CALL_CYCLE_STATUS.ACTIVE,
+    status: CYCLE_STATUS.PENDING,
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    notes: ''
   });
-  const [newLocation, setNewLocation] = useState('');
+  const [availableLocations, setAvailableLocations] = useState([]);
+  const [selectedLocations, setSelectedLocations] = useState([]);
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -53,113 +93,137 @@ const CallCyclesPage = () => {
       
       setCallCycles(teamCallCycles);
       setAgents(teamAgents);
+      setAvailableLocations(locations);
       setLoading(false);
     }
   }, [user]);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  // Filter call cycles based on search query and filters
+  const filteredCallCycles = callCycles.filter(cycle => {
+    const matchesSearch = cycle.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (cycle.notes && cycle.notes.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesStatus = statusFilter === 'all' || cycle.status === statusFilter;
+    const matchesFrequency = frequencyFilter === 'all' || cycle.frequency === frequencyFilter;
+    
+    return matchesSearch && matchesStatus && matchesFrequency;
+  });
 
-  const handleAddCycle = () => {
-    setShowAddCycle(true);
-    setSelectedCycle(null);
-    setFormData({
+  // Group call cycles by status
+  const activeCycles = filteredCallCycles.filter(cycle => cycle.status === CYCLE_STATUS.ACTIVE);
+  const pendingCycles = filteredCallCycles.filter(cycle => cycle.status === CYCLE_STATUS.PENDING);
+  const completedCycles = filteredCallCycles.filter(cycle => cycle.status === CYCLE_STATUS.COMPLETED);
+
+  // Filter locations based on search query
+  const filteredLocations = availableLocations.filter(location => 
+    location.name.toLowerCase().includes(locationSearchQuery.toLowerCase()) ||
+    location.address.toLowerCase().includes(locationSearchQuery.toLowerCase())
+  );
+
+  const handleCreateCycle = () => {
+    // In a real app, this would be an API call
+    const newId = Math.max(...callCycles.map(c => c.id || 0), 0) + 1;
+    const createdCycle = {
+      ...newCycle,
+      id: newId,
+      assignedBy: user.id,
+      adherenceRate: 0,
+      tenantId: user.tenantId,
+      locations: selectedLocations
+    };
+    
+    setCallCycles([...callCycles, createdCycle]);
+    setShowCreateDialog(false);
+    setNewCycle({
       name: '',
-      description: '',
-      frequency: CALL_CYCLE_FREQUENCY.WEEKLY,
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      frequency: CYCLE_FREQUENCIES.WEEKLY,
+      assignedTo: '',
       locations: [],
-      assignedAgents: [],
-      status: CALL_CYCLE_STATUS.ACTIVE,
+      status: CYCLE_STATUS.PENDING,
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      notes: ''
     });
+    setSelectedLocations([]);
   };
 
-  const handleEditCycle = (cycle) => {
-    setShowAddCycle(true);
-    setSelectedCycle(cycle);
-    setFormData({
-      name: cycle.name,
-      description: cycle.description || '',
-      frequency: cycle.frequency,
-      startDate: new Date(cycle.startDate).toISOString().split('T')[0],
-      endDate: new Date(cycle.endDate).toISOString().split('T')[0],
-      locations: cycle.locations || [],
-      assignedAgents: cycle.assignedAgents || [],
-      status: cycle.status,
-    });
-  };
-
-  const handleAddLocation = () => {
-    if (newLocation.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        locations: [...prev.locations, newLocation.trim()]
-      }));
-      setNewLocation('');
-    }
-  };
-
-  const handleRemoveLocation = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      locations: prev.locations.filter((_, i) => i !== index)
-    }));
-  };
-
-  const handleAgentSelection = (agentId) => {
-    setFormData((prev) => {
-      const isSelected = prev.assignedAgents.includes(agentId);
-      return {
-        ...prev,
-        assignedAgents: isSelected
-          ? prev.assignedAgents.filter(id => id !== agentId)
-          : [...prev.assignedAgents, agentId]
-      };
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleEditCycle = () => {
+    // In a real app, this would be an API call
+    const updatedCycles = callCycles.map(cycle => 
+      cycle.id === currentCycle.id ? { ...currentCycle, locations: selectedLocations } : cycle
+    );
     
-    // In a real app, this would be an API call to create or update a call cycle
-    if (selectedCycle) {
-      // Update existing call cycle
-      const updatedCallCycles = callCycles.map(cycle => 
-        cycle.id === selectedCycle.id ? { ...cycle, ...formData } : cycle
-      );
-      setCallCycles(updatedCallCycles);
+    setCallCycles(updatedCycles);
+    setShowEditDialog(false);
+    setCurrentCycle(null);
+    setSelectedLocations([]);
+  };
+
+  const handleDeleteCycle = () => {
+    // In a real app, this would be an API call
+    const updatedCycles = callCycles.filter(cycle => cycle.id !== currentCycle.id);
+    
+    setCallCycles(updatedCycles);
+    setShowDeleteDialog(false);
+    setCurrentCycle(null);
+  };
+
+  const handleViewCycle = (cycle) => {
+    setCurrentCycle(cycle);
+    setSelectedLocations(cycle.locations);
+    setShowViewDialog(true);
+  };
+
+  const handleEditClick = (cycle) => {
+    setCurrentCycle(cycle);
+    setSelectedLocations(cycle.locations);
+    setShowEditDialog(true);
+  };
+
+  const handleDeleteClick = (cycle) => {
+    setCurrentCycle(cycle);
+    setShowDeleteDialog(true);
+  };
+
+  const toggleLocationSelection = (location) => {
+    if (selectedLocations.some(loc => loc.id === location.id)) {
+      setSelectedLocations(selectedLocations.filter(loc => loc.id !== location.id));
     } else {
-      // Add new call cycle
-      const newCallCycle = {
-        id: `cycle-${Date.now()}`,
-        ...formData,
-        tenantId: user.tenantId,
-        teamLeaderId: user.id,
-        createdBy: user.id,
-        createdAt: new Date().toISOString(),
-        adherenceRate: 0,
-      };
-      setCallCycles([...callCycles, newCallCycle]);
+      setSelectedLocations([...selectedLocations, location]);
     }
-    
-    setShowAddCycle(false);
-    setSelectedCycle(null);
   };
 
-  const handleDeleteCycle = (cycleId) => {
-    // In a real app, this would be an API call to delete a call cycle
-    const updatedCallCycles = callCycles.filter(cycle => cycle.id !== cycleId);
-    setCallCycles(updatedCallCycles);
+  const getAgentName = (agentId) => {
+    const agent = agents.find(a => a.id === agentId);
+    return agent ? agent.name : 'Unassigned';
   };
 
-  const getFilteredCallCycles = () => {
-    if (activeTab === 'all') return callCycles;
-    return callCycles.filter(cycle => cycle.status === activeTab);
+  const getStatusBadgeColor = (status) => {
+    switch (status) {
+      case CYCLE_STATUS.ACTIVE:
+        return 'bg-green-100 text-green-800';
+      case CYCLE_STATUS.PENDING:
+        return 'bg-yellow-100 text-yellow-800';
+      case CYCLE_STATUS.COMPLETED:
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
+  const getFrequencyBadgeColor = (frequency) => {
+    switch (frequency) {
+      case CYCLE_FREQUENCIES.DAILY:
+        return 'bg-purple-100 text-purple-800';
+      case CYCLE_FREQUENCIES.WEEKLY:
+        return 'bg-blue-100 text-blue-800';
+      case CYCLE_FREQUENCIES.MONTHLY:
+        return 'bg-indigo-100 text-indigo-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  // DataTable columns configuration
   const columns = [
     {
       accessorKey: 'name',
@@ -167,7 +231,7 @@ const CallCyclesPage = () => {
       cell: ({ row }) => (
         <div>
           <p className="font-medium">{row.original.name}</p>
-          <p className="text-xs text-gray-500">{row.original.description}</p>
+          <p className="text-xs text-gray-500">{row.original.notes}</p>
         </div>
       ),
     },
@@ -175,9 +239,9 @@ const CallCyclesPage = () => {
       accessorKey: 'frequency',
       header: 'Frequency',
       cell: ({ row }) => (
-        <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          {row.original.frequency}
-        </span>
+        <Badge className={getFrequencyBadgeColor(row.original.frequency)}>
+          {row.original.frequency.charAt(0).toUpperCase() + row.original.frequency.slice(1)}
+        </Badge>
       ),
     },
     {
@@ -186,9 +250,9 @@ const CallCyclesPage = () => {
       cell: ({ row }) => `${row.original.locations.length} locations`,
     },
     {
-      accessorKey: 'assignedAgents',
-      header: 'Agents',
-      cell: ({ row }) => `${row.original.assignedAgents.length} agents`,
+      accessorKey: 'assignedTo',
+      header: 'Assigned To',
+      cell: ({ row }) => getAgentName(row.original.assignedTo),
     },
     {
       accessorKey: 'adherenceRate',
@@ -198,20 +262,11 @@ const CallCyclesPage = () => {
     {
       accessorKey: 'status',
       header: 'Status',
-      cell: ({ row }) => {
-        const status = row.original.status;
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            status === CALL_CYCLE_STATUS.ACTIVE 
-              ? 'bg-green-100 text-green-800' 
-              : status === CALL_CYCLE_STATUS.PENDING
-                ? 'bg-yellow-100 text-yellow-800'
-                : 'bg-gray-100 text-gray-800'
-          }`}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </span>
-        );
-      },
+      cell: ({ row }) => (
+        <Badge className={getStatusBadgeColor(row.original.status)}>
+          {row.original.status.charAt(0).toUpperCase() + row.original.status.slice(1)}
+        </Badge>
+      ),
     },
     {
       id: 'actions',
@@ -221,14 +276,21 @@ const CallCyclesPage = () => {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => handleEditCycle(row.original)}
+            onClick={() => handleViewCycle(row.original)}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => handleEditClick(row.original)}
           >
             <Edit className="h-4 w-4" />
           </Button>
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => handleDeleteCycle(row.original.id)}
+            onClick={() => handleDeleteClick(row.original)}
           >
             <Trash className="h-4 w-4" />
           </Button>
@@ -249,23 +311,289 @@ const CallCyclesPage = () => {
     );
   }
 
-  const filteredCallCycles = getFilteredCallCycles();
+  // Call Cycle Card Component
+  const CallCycleCard = ({ 
+    cycle, 
+    getAgentName, 
+    getStatusBadgeColor, 
+    getFrequencyBadgeColor,
+    onView,
+    onEdit,
+    onDelete
+  }) => {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-lg">{cycle.name}</CardTitle>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={onView}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onEdit}>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onDelete} className="text-red-600">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-1">
+            <Badge className={getStatusBadgeColor(cycle.status)}>
+              {cycle.status.charAt(0).toUpperCase() + cycle.status.slice(1)}
+            </Badge>
+            <Badge className={getFrequencyBadgeColor(cycle.frequency)}>
+              {cycle.frequency.charAt(0).toUpperCase() + cycle.frequency.slice(1)}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            <div className="flex items-center">
+              <Users className="h-4 w-4 mr-2 text-gray-500" />
+              <span className="text-sm">Assigned to: <span className="font-medium">{getAgentName(cycle.assignedTo)}</span></span>
+            </div>
+            <div className="flex items-center">
+              <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+              <span className="text-sm">{cycle.locations.length} locations to visit</span>
+            </div>
+            <div className="flex items-center">
+              <Clock className="h-4 w-4 mr-2 text-gray-500" />
+              <span className="text-sm">
+                {formatDate(new Date(cycle.startDate))} - {formatDate(new Date(cycle.endDate))}
+              </span>
+            </div>
+            <div>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-sm">Adherence Rate:</span>
+                <span className="text-sm font-medium">{formatPercentage(cycle.adherenceRate)}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className={`h-2 rounded-full ${
+                    cycle.adherenceRate >= 80 ? 'bg-green-600' : 
+                    cycle.adherenceRate >= 50 ? 'bg-yellow-600' : 'bg-red-600'
+                  }`}
+                  style={{ width: `${cycle.adherenceRate}%` }}
+                ></div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button variant="outline" className="w-full" onClick={onView}>
+            View Details
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  };
 
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold">Call Cycles</h1>
-            <p className="text-gray-500 mt-1">Manage recurring visit schedules for your team</p>
+            <h1 className="text-2xl font-bold">Call Cycles Management</h1>
+            <p className="text-gray-500 mt-1">Create and manage recurring visit schedules for your team</p>
           </div>
-          <div className="mt-4 md:mt-0">
-            <Button onClick={handleAddCycle}>
+          <div className="mt-4 md:mt-0 flex space-x-2">
+            <Button onClick={() => setShowCreateDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Create Call Cycle
             </Button>
           </div>
         </div>
+        
+        {/* Search and Filters */}
+        <div className="flex flex-col md:flex-row gap-4 mb-6">
+          <div className="relative flex-grow">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <Input
+              placeholder="Search call cycles..."
+              className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[150px]">
+                <div className="flex items-center">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <span>Status</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value={CYCLE_STATUS.ACTIVE}>Active</SelectItem>
+                <SelectItem value={CYCLE_STATUS.PENDING}>Pending</SelectItem>
+                <SelectItem value={CYCLE_STATUS.COMPLETED}>Completed</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={frequencyFilter} onValueChange={setFrequencyFilter}>
+              <SelectTrigger className="w-[150px]">
+                <div className="flex items-center">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  <span>Frequency</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Frequencies</SelectItem>
+                <SelectItem value={CYCLE_FREQUENCIES.DAILY}>Daily</SelectItem>
+                <SelectItem value={CYCLE_FREQUENCIES.WEEKLY}>Weekly</SelectItem>
+                <SelectItem value={CYCLE_FREQUENCIES.MONTHLY}>Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        {/* Create Call Cycle Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Create New Call Cycle</DialogTitle>
+              <DialogDescription>
+                Create a new recurring schedule of locations assigned to agents
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Call Cycle Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Weekly Store Visits"
+                    value={newCycle.name}
+                    onChange={(e) => setNewCycle({ ...newCycle, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="frequency">Frequency</Label>
+                  <Select 
+                    value={newCycle.frequency} 
+                    onValueChange={(value) => setNewCycle({ ...newCycle, frequency: value })}
+                  >
+                    <SelectTrigger id="frequency">
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={CYCLE_FREQUENCIES.DAILY}>Daily</SelectItem>
+                      <SelectItem value={CYCLE_FREQUENCIES.WEEKLY}>Weekly</SelectItem>
+                      <SelectItem value={CYCLE_FREQUENCIES.MONTHLY}>Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={newCycle.startDate}
+                    onChange={(e) => setNewCycle({ ...newCycle, startDate: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={newCycle.endDate}
+                    onChange={(e) => setNewCycle({ ...newCycle, endDate: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="assignedTo">Assign To Agent</Label>
+                <Select 
+                  value={newCycle.assignedTo} 
+                  onValueChange={(value) => setNewCycle({ ...newCycle, assignedTo: value })}
+                >
+                  <SelectTrigger id="assignedTo">
+                    <SelectValue placeholder="Select agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Input
+                  id="notes"
+                  placeholder="Additional information about this call cycle"
+                  value={newCycle.notes}
+                  onChange={(e) => setNewCycle({ ...newCycle, notes: e.target.value })}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Locations ({selectedLocations.length} selected)</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                    <Input
+                      placeholder="Search locations..."
+                      className="pl-10 w-[250px]"
+                      value={locationSearchQuery}
+                      onChange={(e) => setLocationSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="border rounded-md h-64 overflow-y-auto p-2">
+                  {filteredLocations.length > 0 ? (
+                    filteredLocations.map((location) => (
+                      <div key={location.id} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
+                        <Checkbox
+                          id={`location-${location.id}`}
+                          checked={selectedLocations.some(loc => loc.id === location.id)}
+                          onCheckedChange={() => toggleLocationSelection(location)}
+                        />
+                        <Label
+                          htmlFor={`location-${location.id}`}
+                          className="flex-grow cursor-pointer"
+                        >
+                          <div className="font-medium">{location.name}</div>
+                          <div className="text-sm text-gray-500">{location.address}</div>
+                        </Label>
+                        <Badge className={location.type === 'Shop' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                          {location.type}
+                        </Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No locations found matching your search.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateCycle} disabled={!newCycle.name || !newCycle.assignedTo || selectedLocations.length === 0}>
+                Create Call Cycle
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Call Cycle Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -593,6 +921,429 @@ const CallCyclesPage = () => {
             </CardContent>
           </Card>
         </div>
+      </div>
+    </div>
+  );
+};
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Create New Call Cycle</DialogTitle>
+              <DialogDescription>
+                Create a new recurring schedule of locations assigned to agents
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Call Cycle Name</Label>
+                  <Input
+                    id="name"
+                    placeholder="Weekly Store Visits"
+                    value={newCycle.name}
+                    onChange={(e) => setNewCycle({ ...newCycle, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="frequency">Frequency</Label>
+                  <Select 
+                    value={newCycle.frequency} 
+                    onValueChange={(value) => setNewCycle({ ...newCycle, frequency: value })}
+                  >
+                    <SelectTrigger id="frequency">
+                      <SelectValue placeholder="Select frequency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={CYCLE_FREQUENCIES.DAILY}>Daily</SelectItem>
+                      <SelectItem value={CYCLE_FREQUENCIES.WEEKLY}>Weekly</SelectItem>
+                      <SelectItem value={CYCLE_FREQUENCIES.MONTHLY}>Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date</Label>
+                  <Input
+                    id="startDate"
+                    type="date"
+                    value={newCycle.startDate}
+                    onChange={(e) => setNewCycle({ ...newCycle, startDate: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date</Label>
+                  <Input
+                    id="endDate"
+                    type="date"
+                    value={newCycle.endDate}
+                    onChange={(e) => setNewCycle({ ...newCycle, endDate: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="assignedTo">Assign To Agent</Label>
+                <Select 
+                  value={newCycle.assignedTo} 
+                  onValueChange={(value) => setNewCycle({ ...newCycle, assignedTo: value })}
+                >
+                  <SelectTrigger id="assignedTo">
+                    <SelectValue placeholder="Select agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Input
+                  id="notes"
+                  placeholder="Additional information about this call cycle"
+                  value={newCycle.notes}
+                  onChange={(e) => setNewCycle({ ...newCycle, notes: e.target.value })}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Locations ({selectedLocations.length} selected)</Label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                    <Input
+                      placeholder="Search locations..."
+                      className="pl-10 w-[250px]"
+                      value={locationSearchQuery}
+                      onChange={(e) => setLocationSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="border rounded-md h-64 overflow-y-auto p-2">
+                  {filteredLocations.length > 0 ? (
+                    filteredLocations.map((location) => (
+                      <div key={location.id} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
+                        <Checkbox
+                          id={`location-${location.id}`}
+                          checked={selectedLocations.some(loc => loc.id === location.id)}
+                          onCheckedChange={() => toggleLocationSelection(location)}
+                        />
+                        <Label
+                          htmlFor={`location-${location.id}`}
+                          className="flex-grow cursor-pointer"
+                        >
+                          <div className="font-medium">{location.name}</div>
+                          <div className="text-sm text-gray-500">{location.address}</div>
+                        </Label>
+                        <Badge className={location.type === 'Shop' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                          {location.type}
+                        </Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No locations found matching your search.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateCycle} disabled={!newCycle.name || !newCycle.assignedTo || selectedLocations.length === 0}>
+                Create Call Cycle
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Call Cycle Dialog */}
+        {currentCycle && (
+          <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Edit Call Cycle</DialogTitle>
+                <DialogDescription>
+                  Update the details of this call cycle
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-name">Call Cycle Name</Label>
+                    <Input
+                      id="edit-name"
+                      value={currentCycle.name}
+                      onChange={(e) => setCurrentCycle({ ...currentCycle, name: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-frequency">Frequency</Label>
+                    <Select 
+                      value={currentCycle.frequency} 
+                      onValueChange={(value) => setCurrentCycle({ ...currentCycle, frequency: value })}
+                    >
+                      <SelectTrigger id="edit-frequency">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value={CYCLE_FREQUENCIES.DAILY}>Daily</SelectItem>
+                        <SelectItem value={CYCLE_FREQUENCIES.WEEKLY}>Weekly</SelectItem>
+                        <SelectItem value={CYCLE_FREQUENCIES.MONTHLY}>Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-startDate">Start Date</Label>
+                    <Input
+                      id="edit-startDate"
+                      type="date"
+                      value={currentCycle.startDate.split('T')[0]}
+                      onChange={(e) => setCurrentCycle({ ...currentCycle, startDate: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-endDate">End Date</Label>
+                    <Input
+                      id="edit-endDate"
+                      type="date"
+                      value={currentCycle.endDate.split('T')[0]}
+                      onChange={(e) => setCurrentCycle({ ...currentCycle, endDate: e.target.value })}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit-assignedTo">Assign To Agent</Label>
+                  <Select 
+                    value={currentCycle.assignedTo} 
+                    onValueChange={(value) => setCurrentCycle({ ...currentCycle, assignedTo: value })}
+                  >
+                    <SelectTrigger id="edit-assignedTo">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agents.map((agent) => (
+                        <SelectItem key={agent.id} value={agent.id}>{agent.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit-status">Status</Label>
+                  <Select 
+                    value={currentCycle.status} 
+                    onValueChange={(value) => setCurrentCycle({ ...currentCycle, status: value })}
+                  >
+                    <SelectTrigger id="edit-status">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={CYCLE_STATUS.ACTIVE}>Active</SelectItem>
+                      <SelectItem value={CYCLE_STATUS.PENDING}>Pending</SelectItem>
+                      <SelectItem value={CYCLE_STATUS.COMPLETED}>Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="edit-notes">Notes</Label>
+                  <Input
+                    id="edit-notes"
+                    value={currentCycle.notes}
+                    onChange={(e) => setCurrentCycle({ ...currentCycle, notes: e.target.value })}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <Label>Locations ({selectedLocations.length} selected)</Label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                      <Input
+                        placeholder="Search locations..."
+                        className="pl-10 w-[250px]"
+                        value={locationSearchQuery}
+                        onChange={(e) => setLocationSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="border rounded-md h-64 overflow-y-auto p-2">
+                    {filteredLocations.length > 0 ? (
+                      filteredLocations.map((location) => (
+                        <div key={location.id} className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded">
+                          <Checkbox
+                            id={`edit-location-${location.id}`}
+                            checked={selectedLocations.some(loc => loc.id === location.id)}
+                            onCheckedChange={() => toggleLocationSelection(location)}
+                          />
+                          <Label
+                            htmlFor={`edit-location-${location.id}`}
+                            className="flex-grow cursor-pointer"
+                          >
+                            <div className="font-medium">{location.name}</div>
+                            <div className="text-sm text-gray-500">{location.address}</div>
+                          </Label>
+                          <Badge className={location.type === 'Shop' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                            {location.type}
+                          </Badge>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        No locations found matching your search.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+                <Button onClick={handleEditCycle} disabled={!currentCycle.name || !currentCycle.assignedTo || selectedLocations.length === 0}>
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* Delete Call Cycle Dialog */}
+        {currentCycle && (
+          <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Delete Call Cycle</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to delete this call cycle? This action cannot be undone.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="py-4">
+                <p className="font-medium">{currentCycle.name}</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {currentCycle.locations.length} locations • Assigned to {getAgentName(currentCycle.assignedTo)}
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={handleDeleteCycle}>
+                  Delete Call Cycle
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
+
+        {/* View Call Cycle Dialog */}
+        {currentCycle && (
+          <Dialog open={showViewDialog} onOpenChange={setShowViewDialog}>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>{currentCycle.name}</DialogTitle>
+                <DialogDescription>
+                  Call cycle details and assigned locations
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-6 py-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Frequency</h3>
+                    <p className="font-medium">
+                      <Badge className={getFrequencyBadgeColor(currentCycle.frequency)}>
+                        {currentCycle.frequency.charAt(0).toUpperCase() + currentCycle.frequency.slice(1)}
+                      </Badge>
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Status</h3>
+                    <p className="font-medium">
+                      <Badge className={getStatusBadgeColor(currentCycle.status)}>
+                        {currentCycle.status.charAt(0).toUpperCase() + currentCycle.status.slice(1)}
+                      </Badge>
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Start Date</h3>
+                    <p className="font-medium">{formatDate(new Date(currentCycle.startDate))}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">End Date</h3>
+                    <p className="font-medium">{formatDate(new Date(currentCycle.endDate))}</p>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Assigned To</h3>
+                  <p className="font-medium">{getAgentName(currentCycle.assignedTo)}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-1">Adherence Rate</h3>
+                  <div className="w-full bg-gray-200 rounded-full h-2.5 mb-1">
+                    <div 
+                      className={`h-2.5 rounded-full ${
+                        currentCycle.adherenceRate >= 80 ? 'bg-green-600' : 
+                        currentCycle.adherenceRate >= 50 ? 'bg-yellow-600' : 'bg-red-600'
+                      }`}
+                      style={{ width: `${currentCycle.adherenceRate}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-sm">{formatPercentage(currentCycle.adherenceRate)}</p>
+                </div>
+                
+                {currentCycle.notes && (
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-500 mb-1">Notes</h3>
+                    <p>{currentCycle.notes}</p>
+                  </div>
+                )}
+                
+                <div>
+                  <h3 className="text-sm font-medium text-gray-500 mb-2">Assigned Locations ({currentCycle.locations.length})</h3>
+                  <div className="border rounded-md h-64 overflow-y-auto">
+                    {currentCycle.locations.map((location) => (
+                      <div key={location.id} className="flex items-start p-3 border-b last:border-b-0">
+                        <div className="flex-shrink-0 mr-3">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <MapPin className="h-4 w-4 text-blue-600" />
+                          </div>
+                        </div>
+                        <div className="flex-grow">
+                          <p className="font-medium">{location.name}</p>
+                          <p className="text-sm text-gray-500">{location.address}</p>
+                          <div className="flex items-center mt-1">
+                            <Badge className={location.type === 'Shop' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                              {location.type}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowViewDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  setShowViewDialog(false);
+                  handleEditClick(currentCycle);
+                }}>
+                  Edit Call Cycle
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </div>
   );

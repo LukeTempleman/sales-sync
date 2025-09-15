@@ -26,7 +26,7 @@ import AgentCallCyclePage from '../pages/agent/CallCyclePage';
 // Team Leader pages
 import TeamLeaderDashboard from '../pages/team-leader/TeamLeaderDashboard';
 import TeamManagementPage from '../pages/team-leader/TeamManagementPage';
-import TeamCallCyclesPage from '../pages/team-leader/TeamCallCyclesPage';
+import CallCyclesPage from '../pages/team-leader/CallCyclesPage';
 import TeamAnalyticsPage from '../pages/team-leader/TeamAnalyticsPage';
 import TeamVisitHistoryPage from '../pages/team-leader/TeamVisitHistoryPage';
 
@@ -127,7 +127,7 @@ export default function Router() {
         { path: '', element: <Navigate to="/team-leader/dashboard" /> },
         { path: 'dashboard', element: <TeamLeaderDashboard /> },
         { path: 'team-management', element: <TeamManagementPage /> },
-        { path: 'call-cycles', element: <TeamCallCyclesPage /> },
+        { path: 'call-cycles', element: <CallCyclesPage /> },
         { path: 'analytics', element: <TeamAnalyticsPage /> },
         { path: 'visit-history', element: <TeamVisitHistoryPage /> },
         { path: 'profile', element: <ProfilePage /> },
