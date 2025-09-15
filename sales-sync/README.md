@@ -241,6 +241,9 @@ sales-sync/
 - **Admin Goal Management Page**: Admins can now create, edit, and manage goals for all users across the platform, with filtering by goal type, status, and assignee.
 - **Enhanced Location Data**: Call cycles now include realistic South African locations with proper geocoding, addresses, and location types.
 - **Improved Data Visualization**: Added more detailed charts and graphs for analytics dashboards.
+- **Shelf Analysis Grid**: Added interactive grid overlay for shelf photos with quadrant selection and automatic shelf share calculation.
+- **Photo Selection**: Implemented functionality to select photos from the user's device for ID/passport, shelves, advertising, and shop exterior.
+- **Enhanced Dark Mode**: Updated all UI components to use theme-compatible classes for consistent appearance in both light and dark modes.
 
 ### Available Scripts
 
