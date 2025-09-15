@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { MapPin, User, Phone, Camera, Check, X, Info, ShoppingBag } from 'lucide-react';
@@ -8,6 +8,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
 import { VISIT_TYPES, VISIT_STATUS, brands } from '../../data';
+import ShelfAnalysisGrid from '../../components/ShelfAnalysisGrid';
 
 const NewVisitPage = () => {
   const { user } = useAuth();
@@ -622,11 +623,16 @@ const NewVisitPage = () => {
                     )}
                   </div>
                   {watch('shelfPhoto') && (
-                    <div className="mt-2">
-                      <img 
-                        src={watch('shelfPhoto')} 
-                        alt="Shelf" 
-                        className="max-h-32 rounded border border-gray-200" 
+                    <div className="mt-4">
+                      <ShelfAnalysisGrid 
+                        imageUrl={watch('shelfPhoto')} 
+                        onShelfShareCalculated={(percentage) => {
+                          reset({ 
+                            ...watch(), 
+                            shelfShare: percentage,
+                            gridMarked: true 
+                          });
+                        }}
                       />
                     </div>
                   )}
@@ -644,7 +650,12 @@ const NewVisitPage = () => {
                       min: { value: 0, message: 'Shelf share cannot be negative' },
                       max: { value: 100, message: 'Shelf share cannot exceed 100%' }
                     })}
+                    readOnly
+                    className="bg-gray-50"
                   />
+                  <p className="text-xs text-gray-500">
+                    This value is automatically calculated from your grid selection above.
+                  </p>
                   {errors.shelfShare && (
                     <p className="text-sm text-rose-500">{errors.shelfShare.message}</p>
                   )}
@@ -657,6 +668,7 @@ const NewVisitPage = () => {
                       id="gridMarked"
                       {...register('gridMarked')}
                       className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"
+                      disabled
                     />
                     <Label htmlFor="gridMarked">Grid marked for shelf analysis</Label>
                   </div>
