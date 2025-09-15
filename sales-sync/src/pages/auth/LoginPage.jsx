@@ -131,7 +131,71 @@ const LoginPage = () => {
   };
 
   return (
-    <div>
+    <div className="relative">
+      {/* Demo role selector in the corner */}
+      {tenant && (
+        <div className="absolute top-0 right-0">
+          <details className="text-right">
+            <summary className="cursor-pointer text-xs text-muted-foreground hover:text-primary inline-block p-2">
+              Demo: Quick Login
+            </summary>
+            <div className="bg-card border rounded-md shadow-md p-3 mt-1 w-48">
+              <h4 className="text-xs font-medium mb-2 text-muted-foreground">Select Role:</h4>
+              <div className="space-y-1">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-left h-8"
+                  onClick={() => quickLogin(ROLES.AGENT)}
+                >
+                  <span className="text-sm">Agent</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-left h-8"
+                  onClick={() => quickLogin(ROLES.TEAM_LEADER)}
+                >
+                  <span className="text-sm">Team Leader</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-left h-8"
+                  onClick={() => quickLogin(ROLES.AREA_MANAGER)}
+                >
+                  <span className="text-sm">Area Manager</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-left h-8"
+                  onClick={() => quickLogin(ROLES.REGIONAL_MANAGER)}
+                >
+                  <span className="text-sm">Regional Manager</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-left h-8"
+                  onClick={() => quickLogin(ROLES.NATIONAL_MANAGER)}
+                >
+                  <span className="text-sm">National Manager</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="w-full justify-start text-left h-8"
+                  onClick={() => quickLogin(ROLES.ADMIN)}
+                >
+                  <span className="text-sm">Admin</span>
+                </Button>
+              </div>
+            </div>
+          </details>
+        </div>
+      )}
+
       <h2 className="text-2xl font-bold mb-6 text-center">Login to Sales-sync</h2>
       
       {tenant && (
@@ -148,108 +212,44 @@ const LoginPage = () => {
           {error}
         </div>
       )}
-
-      {/* Quick login section for demo purposes */}
-      {tenant && (
-        <div className="mb-8">
-          <h3 className="text-lg font-medium mb-4 text-center">Select Your Role</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <Button 
-              variant="default" 
-              size="lg" 
-              className="h-16 flex flex-col items-center justify-center"
-              onClick={() => quickLogin(ROLES.AGENT)}
-            >
-              <span className="text-base">Agent</span>
-              <span className="text-xs opacity-70">Field visits, surveys</span>
-            </Button>
-            <Button 
-              variant="default" 
-              size="lg" 
-              className="h-16 flex flex-col items-center justify-center"
-              onClick={() => quickLogin(ROLES.TEAM_LEADER)}
-            >
-              <span className="text-base">Team Leader</span>
-              <span className="text-xs opacity-70">Manage agents</span>
-            </Button>
-            <Button 
-              variant="default" 
-              size="lg" 
-              className="h-16 flex flex-col items-center justify-center"
-              onClick={() => quickLogin(ROLES.AREA_MANAGER)}
-            >
-              <span className="text-base">Area Manager</span>
-              <span className="text-xs opacity-70">Manage teams</span>
-            </Button>
-            <Button 
-              variant="default" 
-              size="lg" 
-              className="h-16 flex flex-col items-center justify-center"
-              onClick={() => quickLogin(ROLES.REGIONAL_MANAGER)}
-            >
-              <span className="text-base">Regional Manager</span>
-              <span className="text-xs opacity-70">Manage areas</span>
-            </Button>
-            <Button 
-              variant="default" 
-              size="lg" 
-              className="h-16 flex flex-col items-center justify-center"
-              onClick={() => quickLogin(ROLES.NATIONAL_MANAGER)}
-            >
-              <span className="text-base">National Manager</span>
-              <span className="text-xs opacity-70">Manage regions</span>
-            </Button>
-            <Button 
-              variant="default" 
-              size="lg" 
-              className="h-16 flex flex-col items-center justify-center"
-              onClick={() => quickLogin(ROLES.ADMIN)}
-            >
-              <span className="text-base">Admin</span>
-              <span className="text-xs opacity-70">System management</span>
-            </Button>
-          </div>
-        </div>
-      )}
       
-      <div className="mt-8 border-t pt-6">
-        <details className="text-center">
-          <summary className="cursor-pointer text-sm text-muted-foreground hover:text-primary inline-block">
-            Manual Login
-          </summary>
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your.email@example.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            <div className="flex justify-end">
-              <a href="#" className="text-sm text-primary hover:underline">
-                Forgot password?
-              </a>
-            </div>
-            <Button type="submit" className="w-full" disabled={loading || !tenant}>
-              {loading ? 'Logging in...' : 'Login'}
-            </Button>
-          </form>
-        </details>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your.email@example.com"
+            required
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+          />
+        </div>
+        <div className="flex justify-end">
+          <a href="#" className="text-sm text-primary hover:underline">
+            Forgot password?
+          </a>
+        </div>
+        <Button type="submit" className="w-full" disabled={loading || !tenant}>
+          {loading ? 'Logging in...' : 'Login'}
+        </Button>
+      </form>
+      
+      <div className="mt-6 text-center">
+        <p className="text-sm text-muted-foreground">
+          Don't have an account? <a href="#" className="text-primary hover:underline">Sign up</a>
+        </p>
       </div>
     </div>
   );
