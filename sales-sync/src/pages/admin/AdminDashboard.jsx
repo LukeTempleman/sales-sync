@@ -66,11 +66,11 @@ const AdminDashboard = () => {
   }));
 
   // Tenant usage data
-  const tenantUsageData = tenants.map(tenant => ({
-    name: tenant.name,
-    users: tenant.userCount,
-    visits: tenant.visitCount,
-    surveys: tenant.surveyCount
+  const tenantUsageData = (tenants || []).map(tenant => ({
+    name: tenant.name || 'Unknown',
+    users: tenant.userCount || 0,
+    visits: tenant.visitCount || 0,
+    surveys: tenant.surveyCount || 0
   }));
 
   return (
@@ -185,13 +185,13 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tenants.map((tenant) => (
+                  {(tenants || []).map((tenant) => (
                     <tr key={tenant.id} className="border-b">
                       <td className="py-3 px-4">
                         <div className="flex items-center">
                           <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
                             <span className="text-blue-600 font-semibold">
-                              {tenant.name.charAt(0)}
+                              {tenant.name && tenant.name.charAt(0) || 'T'}
                             </span>
                           </div>
                           <div>
@@ -213,7 +213,7 @@ const AdminDashboard = () => {
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-secondary text-secondary-foreground'
                         }`}>
-                          {tenant.status.charAt(0).toUpperCase() + tenant.status.slice(1)}
+                          {tenant.status && tenant.status.charAt(0).toUpperCase() + tenant.status.slice(1) || 'Unknown'}
                         </span>
                       </td>
                     </tr>
@@ -237,7 +237,7 @@ const AdminDashboard = () => {
               <CardDescription>Manage brand information and assets</CardDescription>
             </CardHeader>
             <CardContent>
-              {brands.slice(0, 5).map((brand) => (
+              {(brands || []).slice(0, 5).map((brand) => (
                 <div key={brand.id} className="mb-4 last:mb-0">
                   <div className="flex justify-between items-start">
                     <div className="flex items-center">
@@ -278,7 +278,7 @@ const AdminDashboard = () => {
               <CardDescription>Manage survey templates</CardDescription>
             </CardHeader>
             <CardContent>
-              {surveys.slice(0, 5).map((survey) => (
+              {(surveys || []).slice(0, 5).map((survey) => (
                 <div key={survey.id} className="mb-4 last:mb-0">
                   <div className="flex justify-between items-start">
                     <div>
@@ -294,7 +294,7 @@ const AdminDashboard = () => {
                           ? 'bg-yellow-100 text-yellow-800'
                           : 'bg-secondary text-secondary-foreground'
                     }`}>
-                      {survey.status.charAt(0).toUpperCase() + survey.status.slice(1)}
+                      {survey.status && survey.status.charAt(0).toUpperCase() + survey.status.slice(1) || 'Unknown'}
                     </span>
                   </div>
                   <div className="mt-2 flex justify-end">
