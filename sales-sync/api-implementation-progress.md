@@ -41,6 +41,30 @@ This file tracks the progress of implementing backend API integration in the Sal
    - Get Locations
    - Search Locations
 
+7. Visits
+   - Get Visits
+   - Get Visits by Agent
+   - Get Visits by Team
+   - Get Visits by Area
+   - Get Visits by Region
+   - Get Visits by Tenant
+   - Get Visit by ID
+   - Create Visit
+   - Update Visit
+   - Delete Visit
+   - Upload Visit Photo
+
+8. Teams
+   - Get Teams
+   - Get Team by ID
+   - Get Teams by Area
+   - Get Team Members
+   - Create Team
+   - Update Team
+   - Delete Team
+   - Add Team Member
+   - Remove Team Member
+
 ## In Progress APIs
 
 None currently.
@@ -57,22 +81,14 @@ None currently.
    - Create User
    - Get User by ID
 
-3. Visits
-   - Get Visits
-   - Create Visit
-
-4. Teams
-   - Get Teams
-   - Create Team
-
-5. Goals
+3. Goals
    - Get Goals
    - Create Goal
 
-6. Analytics
+4. Analytics
    - Get Analytics Overview
 
-7. Tenants
+5. Tenants
    - Get Tenants
 
 ## Implementation Notes
@@ -116,3 +132,21 @@ None currently.
 
 - Created service layer for locations that can toggle between mock data and real API
 - Implemented search functionality for locations
+
+### Visits
+
+- Created service layer for visits that can toggle between mock data and real API
+- Implemented CRUD operations for visits
+- Added functions to filter visits by agent, team, area, region, and tenant
+- Added photo upload functionality
+- Updated NewVisitPage and VisitHistoryPage to use the service layer
+- Added error handling for API calls
+
+### Teams
+
+- Created service layer for teams that can toggle between mock data and real API
+- Implemented CRUD operations for teams
+- Added functions to get teams by area and get team members
+- Added functions to add and remove team members
+- Updated TeamManagementPage to use the service layer
+- Added error handling for API calls

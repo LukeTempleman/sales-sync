@@ -7,7 +7,9 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
-import { VISIT_TYPES, VISIT_STATUS, brands } from '../../data';
+import { VISIT_TYPES, VISIT_STATUS } from '../../data/visits';
+import { getBrands } from '../../services/brandsService';
+import { createVisit, uploadVisitPhoto } from '../../services/visitsService';
 import ShelfAnalysisGrid from '../../components/ShelfAnalysisGrid';
 
 const NewVisitPage = () => {
@@ -17,6 +19,21 @@ const NewVisitPage = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [brands, setBrands] = useState([]);
+  
+  // Fetch brands when component mounts
+  React.useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        const brandsData = await getBrands(user?.useRealApi);
+        setBrands(brandsData);
+      } catch (error) {
+        console.error('Error fetching brands:', error);
+      }
+    };
+    
+    fetchBrands();
+  }, [user]);
   
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm({
     defaultValues: {
@@ -76,15 +93,92 @@ const NewVisitPage = () => {
     setStep(step - 1);
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setLoading(true);
     
-    // In a real app, this would be an API call to save the visit
-    console.log('Visit data:', data);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // Prepare visit data based on visit type
+      const visitData = {
+        type: data.type,
+        geocode: data.geocode,
+        status: data.status,
+        agentId: data.agentId,
+        date: new Date().toISOString(),
+        tenantId: data.tenantId,
+        notes: data.notes
+      };
+      
+      // Add type-specific data
+      if (data.type === VISIT_TYPES.CONSUMER) {
+        visitData.consumerDetails = {
+          name: data.consumerName,
+          surname: data.consumerSurname,
+          cellNumber: data.consumerPhone
+        };
+        visitData.brandQuestions = {
+          infoShared: data.infoShared,
+          converted: data.converted,
+          voucherPurchased: data.voucherPurchased,
+          otherPlatformsUsed: data.otherPlatforms ? data.otherPlatforms.split(',') : [],
+          goldrushComparison: data.comparison,
+          feedback: data.feedback
+        };
+      } else if (data.type === VISIT_TYPES.SHOP) {
+        visitData.shopDetails = {
+          name: data.shopName,
+          type: data.shopType,
+          address: data.shopAddress,
+          contactPerson: data.contactPerson,
+          contactNumber: data.contactNumber
+        };
+        visitData.awarenessQuestions = {
+          knowsAboutBrand: data.knowsAboutBrand,
+          stocksProduct: data.stocksProduct
+        };
+        visitData.stockAndSales = {
+          currentSales: data.currentSales,
+          source: data.source
+        };
+        visitData.competitorInfo = {
+          productsStocked: data.competitorProducts ? data.competitorProducts.split(',') : [],
+          prices: data.competitorPrices ? JSON.parse(data.competitorPrices) : {},
+          brands: data.competitorBrands ? data.competitorBrands.split(',') : []
+        };
+        visitData.shelfAnalysis = {
+          shelfShare: data.shelfShare,
+          gridMarked: data.gridMarked
+        };
+        visitData.advertising = {
+          competitorAdverts: data.competitorAdverts ? data.competitorAdverts.split(',') : [],
+          newBoardPlaced: data.newBoardPlaced
+        };
+        visitData.training = {
+          cashierTrained: data.cashierTrained,
+          infographicDisplayed: data.infographicDisplayed
+        };
+      }
+      
+      // Create the visit
+      const newVisit = await createVisit(visitData, user?.useRealApi);
+      
+      // Handle photo uploads if any
+      if (data.idPhoto && data.type === VISIT_TYPES.CONSUMER) {
+        await uploadVisitPhoto(newVisit.id, 'id', data.idPhoto[0], user?.useRealApi);
+      }
+      
+      if (data.shelfPhoto && data.type === VISIT_TYPES.SHOP) {
+        await uploadVisitPhoto(newVisit.id, 'shelf', data.shelfPhoto[0], user?.useRealApi);
+      }
+      
+      if (data.exteriorPhoto && data.type === VISIT_TYPES.SHOP) {
+        await uploadVisitPhoto(newVisit.id, 'exterior', data.exteriorPhoto[0], user?.useRealApi);
+      }
+      
+      if (data.boardPhoto && data.type === VISIT_TYPES.SHOP) {
+        await uploadVisitPhoto(newVisit.id, 'board', data.boardPhoto[0], user?.useRealApi);
+      }
+      
+      // Show success message
       setSuccess(true);
       
       // Reset form after success
@@ -95,7 +189,12 @@ const NewVisitPage = () => {
         reset();
         navigate('/agent/visit-history');
       }, 2000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error creating visit:', error);
+      // Handle error state here
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Mock function to get current location

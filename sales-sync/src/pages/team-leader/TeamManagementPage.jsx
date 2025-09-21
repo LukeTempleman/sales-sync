@@ -5,7 +5,7 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
 import DataTable from '../../components/tables/DataTable';
-import { getAgentsByTeamLeader } from '../../data';
+import { getTeamMembersById } from '../../services/teamsService';
 import { formatPercentage, formatNumber } from '../../lib/utils';
 import { UserPlus, Edit, Trash, Mail, Phone, BarChart2, Target } from 'lucide-react';
 
@@ -23,12 +23,23 @@ const TeamManagementPage = () => {
   });
 
   useEffect(() => {
-    if (user) {
-      // In a real app, this would be an API call
-      const teamAgents = getAgentsByTeamLeader(user.id);
-      setAgents(teamAgents);
-      setLoading(false);
-    }
+    const fetchTeamMembers = async () => {
+      if (user && user.teamId) {
+        try {
+          setLoading(true);
+          // Get team members using our service
+          const teamAgents = await getTeamMembersById(user.teamId, user?.useRealApi);
+          setAgents(teamAgents);
+        } catch (error) {
+          console.error('Error fetching team members:', error);
+          // Handle error state here
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchTeamMembers();
   }, [user]);
 
   const handleInputChange = (e) => {

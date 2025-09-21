@@ -3,7 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import DataTable from '../../components/tables/DataTable';
-import { getVisitsByAgent, VISIT_TYPES, VISIT_STATUS } from '../../data';
+import { VISIT_TYPES, VISIT_STATUS } from '../../data/visits';
+import { getVisitsByAgentId } from '../../services/visitsService';
 import { formatDate, formatTime } from '../../lib/utils';
 import { MapPin, User, ShoppingBag, Eye } from 'lucide-react';
 
@@ -14,12 +15,22 @@ const VisitHistoryPage = () => {
   const [selectedVisit, setSelectedVisit] = useState(null);
 
   useEffect(() => {
-    if (user) {
-      // In a real app, this would be an API call
-      const agentVisits = getVisitsByAgent(user.id);
-      setVisits(agentVisits);
-      setLoading(false);
-    }
+    const fetchVisits = async () => {
+      if (user) {
+        try {
+          setLoading(true);
+          const agentVisits = await getVisitsByAgentId(user.id, user?.useRealApi);
+          setVisits(agentVisits);
+        } catch (error) {
+          console.error('Error fetching visits:', error);
+          // Handle error state here
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchVisits();
   }, [user]);
 
   const columns = [
