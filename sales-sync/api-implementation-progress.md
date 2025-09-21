@@ -65,6 +65,26 @@ This file tracks the progress of implementing backend API integration in the Sal
    - Add Team Member
    - Remove Team Member
 
+9. Goals
+   - Get Goals
+   - Get Goals by User
+   - Get Goals by Team
+   - Get Goals by Area
+   - Get Goals by Region
+   - Get Goals by Tenant
+   - Get Goal by ID
+   - Create Goal
+   - Update Goal
+   - Delete Goal
+   - Assign Goal
+
+10. Analytics
+    - Get Analytics Overview
+    - Get Visit Statistics
+    - Get User Statistics
+    - Get Goal Statistics
+    - Get Call Cycle Statistics
+
 ## In Progress APIs
 
 None currently.
@@ -81,14 +101,7 @@ None currently.
    - Create User
    - Get User by ID
 
-3. Goals
-   - Get Goals
-   - Create Goal
-
-4. Analytics
-   - Get Analytics Overview
-
-5. Tenants
+3. Tenants
    - Get Tenants
 
 ## Implementation Notes
@@ -149,4 +162,20 @@ None currently.
 - Added functions to get teams by area and get team members
 - Added functions to add and remove team members
 - Updated TeamManagementPage to use the service layer
+- Added error handling for API calls
+
+### Goals
+
+- Created service layer for goals that can toggle between mock data and real API
+- Implemented CRUD operations for goals
+- Added functions to filter goals by user, team, area, region, and tenant
+- Added functions to assign goals and update goal progress
+- Updated GoalsPage and GoalManagementPage to use the service layer
+- Added error handling for API calls
+
+### Analytics
+
+- Created service layer for analytics that can toggle between mock data and real API
+- Implemented functions to get analytics overview, visit statistics, user statistics, goal statistics, and call cycle statistics
+- Updated AnalyticsPage to use the service layer
 - Added error handling for API calls

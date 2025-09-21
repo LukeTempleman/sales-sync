@@ -3,7 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { getGoalsByUser, GOAL_TYPES, GOAL_STATUS } from '../../data';
+import { getGoalsByUserId, GOAL_TYPES, GOAL_STATUS } from '../../services/goalsService';
 import { formatDate, formatPercentage } from '../../lib/utils';
 import { Target, Calendar, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 
@@ -14,12 +14,22 @@ const GoalsPage = () => {
   const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
-    if (user) {
-      // In a real app, this would be an API call
-      const userGoals = getGoalsByUser(user.id);
-      setGoals(userGoals);
-      setLoading(false);
-    }
+    const fetchGoals = async () => {
+      if (user) {
+        try {
+          setLoading(true);
+          const userGoals = await getGoalsByUserId(user.id, user?.useRealApi);
+          setGoals(userGoals);
+        } catch (error) {
+          console.error('Error fetching goals:', error);
+          // Handle error state here
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchGoals();
   }, [user]);
 
   const getFilteredGoals = () => {

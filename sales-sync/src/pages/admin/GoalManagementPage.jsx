@@ -8,16 +8,14 @@ import { Label } from '../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import Badge from '../../components/ui/badge';
 import { 
-  allGoals, 
+  getGoals,
+  getGoalsByTenantId,
   GOAL_TYPES, 
   GOAL_METRICS, 
-  GOAL_STATUS, 
-  getGoalsByTenant, 
-  getGoalsByType, 
-  getGoalsByMetric, 
-  getGoalsByStatus 
-} from '../../data';
-import { allUsers, getUsersByTenant, ROLES } from '../../data';
+  GOAL_STATUS
+} from '../../services/goalsService';
+import { allUsers, getUsersByTenant, ROLES } from '../../data/users';
+import { createGoal } from '../../services/goalsService';
 import { formatDate, formatPercentage } from '../../lib/utils';
 import { 
   Target, 
@@ -59,18 +57,30 @@ const GoalManagementPage = () => {
   });
 
   useEffect(() => {
-    if (tenant) {
-      // In a real app, these would be API calls
-      const tenantGoals = getGoalsByTenant(tenant.id);
-      setGoals(tenantGoals);
-      setFilteredGoals(tenantGoals);
-      
-      const users = getUsersByTenant(tenant.id);
-      setTenantUsers(users);
-      
-      setLoading(false);
-    }
-  }, [tenant]);
+    const fetchGoals = async () => {
+      if (tenant) {
+        try {
+          setLoading(true);
+          
+          // Fetch goals for the tenant
+          const tenantGoals = await getGoalsByTenantId(tenant.id, user?.useRealApi);
+          setGoals(tenantGoals);
+          setFilteredGoals(tenantGoals);
+          
+          // Fetch users for the tenant
+          const users = getUsersByTenant(tenant.id);
+          setTenantUsers(users);
+        } catch (error) {
+          console.error('Error fetching goals:', error);
+          // Handle error state here
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchGoals();
+  }, [tenant, user]);
 
   useEffect(() => {
     applyFilters();
@@ -183,21 +193,28 @@ const GoalManagementPage = () => {
     setNewGoal(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAddGoal = () => {
-    // In a real app, this would be an API call
-    const newGoalObj = {
-      id: Math.max(...goals.map(g => g.id)) + 1,
-      ...newGoal,
-      progress: 0,
-      status: GOAL_STATUS.PENDING,
-      assignedBy: user.id,
-      tenantId: tenant.id,
-      startDate: new Date(newGoal.startDate),
-      endDate: new Date(newGoal.endDate)
-    };
-    
-    setGoals(prev => [...prev, newGoalObj]);
-    setShowAddGoalForm(false);
+  const handleAddGoal = async () => {
+    try {
+      const goalData = {
+        ...newGoal,
+        progress: 0,
+        status: GOAL_STATUS.PENDING,
+        assignedBy: user.id,
+        tenantId: tenant.id,
+        startDate: new Date(newGoal.startDate),
+        endDate: new Date(newGoal.endDate)
+      };
+      
+      // Create the goal using our service
+      const newGoalObj = await createGoal(goalData, user?.useRealApi);
+      
+      // Update the local state
+      setGoals(prev => [...prev, newGoalObj]);
+      setShowAddGoalForm(false);
+    } catch (error) {
+      console.error('Error creating goal:', error);
+      // Handle error state here
+    }
     
     // Reset form
     setNewGoal({

@@ -4,11 +4,7 @@ import { Button } from '../../components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import ChartCard from '../../components/dashboard/ChartCard';
-import { 
-  getTeamLeaderAnalytics, 
-  getAgentsByTeamLeader,
-  getVisitsByTeamLeader
-} from '../../data';
+import { getAnalyticsOverview, getVisitStats, getUserStats } from '../../services/analyticsService';
 import { formatPercentage, formatNumber, formatDate } from '../../lib/utils';
 import { 
   BarChart2, 
@@ -45,18 +41,44 @@ const AnalyticsPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
-    if (user) {
-      // In a real app, these would be API calls
-      const teamAnalytics = getTeamLeaderAnalytics(user.id);
-      const teamAgents = getAgentsByTeamLeader(user.id);
-      const teamVisits = getVisitsByTeamLeader(user.id);
-      
-      setAnalytics(teamAnalytics);
-      setAgents(teamAgents);
-      setVisits(teamVisits);
-      setLoading(false);
-    }
-  }, [user]);
+    const fetchAnalytics = async () => {
+      if (user) {
+        try {
+          setLoading(true);
+          
+          // Fetch analytics overview for team leader
+          const analyticsData = await getAnalyticsOverview({ 
+            role: 'team_leader', 
+            userId: user.id,
+            teamId: user.teamId,
+            timeRange
+          }, user?.useRealApi);
+          
+          // Fetch user stats for the team
+          const userStatsData = await getUserStats({
+            teamId: user.teamId
+          }, user?.useRealApi);
+          
+          // Fetch visit stats for the team
+          const visitStatsData = await getVisitStats({
+            teamId: user.teamId,
+            timeRange
+          }, user?.useRealApi);
+          
+          setAnalytics(analyticsData);
+          setAgents(userStatsData?.agents || []);
+          setVisits(visitStatsData?.visits || []);
+        } catch (error) {
+          console.error('Error fetching analytics:', error);
+          // Handle error state here
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchAnalytics();
+  }, [user, timeRange]);
 
   if (loading) {
     return (
