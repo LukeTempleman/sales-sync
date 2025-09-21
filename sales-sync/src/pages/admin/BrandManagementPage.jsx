@@ -5,9 +5,9 @@ import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../components/ui/card';
 import DataTable from '../../components/tables/DataTable';
-import { getBrands } from '../../data';
 import { formatDate } from '../../lib/utils';
 import { Plus, Edit, Trash, Upload, Eye, FileText, Image, Link as LinkIcon } from 'lucide-react';
+import { getBrands, createBrand, updateBrand, deleteBrand, uploadBrandAsset } from '../../services/brandsService';
 
 const BrandManagementPage = () => {
   const { user } = useAuth();
@@ -28,11 +28,22 @@ const BrandManagementPage = () => {
   const [selectedAssets, setSelectedAssets] = useState([]);
 
   useEffect(() => {
-    // In a real app, this would be an API call
-    const allBrands = getBrands();
-    setBrands(allBrands);
-    setLoading(false);
-  }, []);
+    const fetchBrands = async () => {
+      try {
+        // Get brands using our service
+        // Pass user.useRealApi to toggle between mock and real API
+        const allBrands = await getBrands(user?.useRealApi);
+        setBrands(allBrands);
+      } catch (error) {
+        console.error('Error fetching brands:', error);
+        // Handle error state here
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchBrands();
+  }, [user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -87,71 +98,108 @@ const BrandManagementPage = () => {
     setSelectedAssets(brand.assets || []);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // In a real app, this would be an API call to create or update a brand
-    if (selectedBrand) {
-      // Update existing brand
-      const updatedBrands = brands.map(brand => 
-        brand.id === selectedBrand.id ? { 
-          ...brand, 
+    try {
+      if (selectedBrand) {
+        // Update existing brand
+        const updatedBrand = await updateBrand(
+          selectedBrand.id, 
+          {
+            ...formData,
+            tenantId: user.tenantId
+          },
+          user?.useRealApi
+        );
+        
+        // Update the brands list
+        const updatedBrands = brands.map(brand => 
+          brand.id === selectedBrand.id ? updatedBrand : brand
+        );
+        setBrands(updatedBrands);
+      } else {
+        // Add new brand
+        const brandData = {
           ...formData,
-          updatedAt: new Date().toISOString()
-        } : brand
-      );
-      setBrands(updatedBrands);
-    } else {
-      // Add new brand
-      const newBrand = {
-        id: `brand-${Date.now()}`,
-        ...formData,
-        tenantCount: 0,
-        surveyCount: 0,
-        assets: [],
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        status: 'active'
-      };
-      setBrands([...brands, newBrand]);
+          tenantId: user.tenantId,
+          tenantCount: 0,
+          surveyCount: 0,
+          status: 'active'
+        };
+        
+        const newBrand = await createBrand(brandData, user?.useRealApi);
+        setBrands([...brands, newBrand]);
+      }
+      
+      // If there's a logo file, upload it
+      if (formData.logo && formData.logo instanceof File) {
+        const brandId = selectedBrand ? selectedBrand.id : brands[brands.length - 1].id;
+        await uploadBrandAsset(
+          brandId,
+          'logo',
+          formData.logo,
+          { description: `Logo for ${formData.name}` },
+          user?.useRealApi
+        );
+      }
+      
+      setShowAddBrand(false);
+      setSelectedBrand(null);
+      setLogoPreview(null);
+    } catch (error) {
+      console.error('Error saving brand:', error);
+      // Handle error state here
     }
-    
-    setShowAddBrand(false);
-    setSelectedBrand(null);
-    setLogoPreview(null);
   };
 
-  const handleDeleteBrand = (brandId) => {
-    // In a real app, this would be an API call to delete a brand
-    const updatedBrands = brands.filter(brand => brand.id !== brandId);
-    setBrands(updatedBrands);
+  const handleDeleteBrand = async (brandId) => {
+    try {
+      // Delete the brand using our service
+      await deleteBrand(brandId, user?.useRealApi);
+      
+      // Update the UI
+      const updatedBrands = brands.filter(brand => brand.id !== brandId);
+      setBrands(updatedBrands);
+    } catch (error) {
+      console.error(`Error deleting brand with ID ${brandId}:`, error);
+      // Handle error state here
+    }
   };
 
-  const handleAddAsset = (e) => {
+  const handleAddAsset = async (e) => {
     const file = e.target.files[0];
     if (file && selectedBrand) {
-      // In a real app, this would be an API call to upload the asset
-      const newAsset = {
-        id: `asset-${Date.now()}`,
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        url: URL.createObjectURL(file),
-        uploadedAt: new Date().toISOString()
-      };
-      
-      const updatedAssets = [...selectedAssets, newAsset];
-      setSelectedAssets(updatedAssets);
-      
-      // Update the brand with the new asset
-      const updatedBrands = brands.map(brand => 
-        brand.id === selectedBrand.id ? { 
-          ...brand, 
-          assets: updatedAssets,
-          updatedAt: new Date().toISOString()
-        } : brand
-      );
-      setBrands(updatedBrands);
+      try {
+        // Upload the asset using our service
+        const assetType = file.type.startsWith('image/') ? 'infographic' : 'training';
+        const newAsset = await uploadBrandAsset(
+          selectedBrand.id,
+          assetType,
+          file,
+          {
+            name: file.name,
+            description: `${assetType} for ${selectedBrand.name}`
+          },
+          user?.useRealApi
+        );
+        
+        const updatedAssets = [...selectedAssets, newAsset];
+        setSelectedAssets(updatedAssets);
+        
+        // Update the brand with the new asset
+        const updatedBrands = brands.map(brand => 
+          brand.id === selectedBrand.id ? { 
+            ...brand, 
+            assets: updatedAssets,
+            updatedAt: new Date().toISOString()
+          } : brand
+        );
+        setBrands(updatedBrands);
+      } catch (error) {
+        console.error('Error uploading asset:', error);
+        // Handle error state here
+      }
     }
   };
 

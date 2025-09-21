@@ -11,13 +11,18 @@ import { Switch } from '../../components/ui/switch';
 import { Separator } from '../../components/ui/separator';
 import DataTable from '../../components/tables/DataTable';
 import { 
-  allSurveyTemplates, 
   SURVEY_TYPES, 
-  QUESTION_TYPES,
-  getSurveyTemplatesByType
+  QUESTION_TYPES
 } from '../../data/surveys';
-import { getBrands } from '../../data/brands';
 import { getTenants } from '../../data/helpers';
+import { 
+  getSurveyTemplates,
+  getSurveyTemplatesByType,
+  createSurveyTemplate,
+  updateSurveyTemplate,
+  deleteSurveyTemplate
+} from '../../services/surveysService';
+import { getBrands } from '../../services/brandsService';
 import { formatDate } from '../../lib/utils';
 import { 
   Plus, 
@@ -72,23 +77,47 @@ const SurveyManagementPage = () => {
   });
 
   useEffect(() => {
-    // In a real app, these would be API calls
-    const allSurveys = allSurveyTemplates;
-    const allBrands = getBrands();
-    const allTenants = getTenants();
+    const fetchData = async () => {
+      try {
+        // Get data using our services
+        // Pass user.useRealApi to toggle between mock and real API
+        const [allSurveys, allBrands, allTenants] = await Promise.all([
+          getSurveyTemplates(user?.useRealApi),
+          getBrands(user?.useRealApi),
+          getTenants() // This is still using the mock helper
+        ]);
+        
+        setSurveys(allSurveys);
+        setBrands(allBrands);
+        setTenants(allTenants);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        // Handle error state here
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    setSurveys(allSurveys);
-    setBrands(allBrands);
-    setTenants(allTenants);
-    setLoading(false);
-  }, []);
+    fetchData();
+  }, [user]);
 
-  const handleTabChange = (value) => {
+  const handleTabChange = async (value) => {
     setActiveTab(value);
-    if (value === 'all') {
-      setSurveys(allSurveyTemplates);
-    } else {
-      setSurveys(getSurveyTemplatesByType(value));
+    setLoading(true);
+    
+    try {
+      let filteredSurveys;
+      if (value === 'all') {
+        filteredSurveys = await getSurveyTemplates(user?.useRealApi);
+      } else {
+        filteredSurveys = await getSurveyTemplatesByType(value, user?.useRealApi);
+      }
+      setSurveys(filteredSurveys);
+    } catch (error) {
+      console.error('Error fetching surveys:', error);
+      // Handle error state here
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -177,10 +206,18 @@ const SurveyManagementPage = () => {
     });
   };
 
-  const handleDeleteSurvey = (surveyId) => {
-    // In a real app, this would be an API call to delete a survey
-    const updatedSurveys = surveys.filter(survey => survey.id !== surveyId);
-    setSurveys(updatedSurveys);
+  const handleDeleteSurvey = async (surveyId) => {
+    try {
+      // Delete the survey using our service
+      await deleteSurveyTemplate(surveyId, user?.useRealApi);
+      
+      // Update the UI
+      const updatedSurveys = surveys.filter(survey => survey.id !== surveyId);
+      setSurveys(updatedSurveys);
+    } catch (error) {
+      console.error(`Error deleting survey with ID ${surveyId}:`, error);
+      // Handle error state here
+    }
   };
 
   const handleAddQuestion = () => {
@@ -260,33 +297,44 @@ const SurveyManagementPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // In a real app, this would be an API call to create or update a survey
-    if (selectedSurvey) {
-      // Update existing survey
-      const updatedSurveys = surveys.map(survey => 
-        survey.id === selectedSurvey.id ? { 
-          ...survey, 
+    try {
+      if (selectedSurvey) {
+        // Update existing survey
+        const updatedSurvey = await updateSurveyTemplate(
+          selectedSurvey.id,
+          {
+            ...formData,
+            tenantId: user.tenantId
+          },
+          user?.useRealApi
+        );
+        
+        // Update the surveys list
+        const updatedSurveys = surveys.map(survey => 
+          survey.id === selectedSurvey.id ? updatedSurvey : survey
+        );
+        setSurveys(updatedSurveys);
+      } else {
+        // Add new survey
+        const surveyData = {
           ...formData,
-          updatedAt: new Date().toISOString()
-        } : survey
-      );
-      setSurveys(updatedSurveys);
-    } else {
-      // Add new survey
-      const newSurvey = {
-        id: Date.now(),
-        ...formData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      setSurveys([...surveys, newSurvey]);
+          tenantId: user.tenantId,
+          questions: []
+        };
+        
+        const newSurvey = await createSurveyTemplate(surveyData, user?.useRealApi);
+        setSurveys([...surveys, newSurvey]);
+      }
+      
+      setShowAddSurvey(false);
+      setSelectedSurvey(null);
+    } catch (error) {
+      console.error('Error saving survey:', error);
+      // Handle error state here
     }
-    
-    setShowAddSurvey(false);
-    setSelectedSurvey(null);
   };
 
   const handleSearch = (e) => {

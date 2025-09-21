@@ -18,6 +18,29 @@ This file tracks the progress of implementing backend API integration in the Sal
 3. Users
    - Get Agents by Team Leader
 
+4. Brands
+   - Get Brands
+   - Get Brand by ID
+   - Get Brands by Tenant
+   - Create Brand
+   - Update Brand
+   - Delete Brand
+   - Upload Brand Asset
+
+5. Surveys
+   - Get Survey Templates
+   - Get Survey Templates by Type
+   - Get Survey Templates by Tenant
+   - Get Survey Template by ID
+   - Create Survey Template
+   - Update Survey Template
+   - Delete Survey Template
+   - Get Completed Surveys
+
+6. Locations
+   - Get Locations
+   - Search Locations
+
 ## In Progress APIs
 
 None currently.
@@ -34,35 +57,23 @@ None currently.
    - Create User
    - Get User by ID
 
-3. Brands
-   - Get Brands
-   - Create Brand
-
-4. Visits
+3. Visits
    - Get Visits
    - Create Visit
 
-5. Teams
+4. Teams
    - Get Teams
    - Create Team
 
-6. Surveys
-   - Get Surveys
-   - Create Survey
-
-7. Goals
+5. Goals
    - Get Goals
    - Create Goal
 
-8. Analytics
+6. Analytics
    - Get Analytics Overview
 
-9. Tenants
+7. Tenants
    - Get Tenants
-
-10. Locations
-    - Get Locations
-    - Search Locations
 
 ## Implementation Notes
 
@@ -84,6 +95,22 @@ None currently.
 
 - Created service layer for agents that can toggle between mock data and real API
 - Implemented function to get agents by team leader
+
+### Brands
+
+- Created service layer for brands that can toggle between mock data and real API
+- Implemented CRUD operations for brands
+- Added asset upload functionality
+- Updated BrandManagementPage to use the service layer
+- Added error handling for API calls
+
+### Surveys
+
+- Created service layer for surveys that can toggle between mock data and real API
+- Implemented CRUD operations for survey templates
+- Added functions to filter surveys by type and tenant
+- Updated SurveyManagementPage to use the service layer
+- Added error handling for API calls
 
 ### Locations
 
