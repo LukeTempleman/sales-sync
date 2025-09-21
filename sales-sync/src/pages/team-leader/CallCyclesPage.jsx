@@ -49,14 +49,13 @@ import { Separator } from '../../components/ui/separator';
 import { Switch } from '../../components/ui/switch';
 import { Checkbox } from '../../components/ui/checkbox';
 import DataTable from '../../components/tables/DataTable';
-import { 
-  getCallCyclesByTeamLeader, 
-  getAgentsByTeamLeader, 
-  CYCLE_FREQUENCIES, 
-  CYCLE_STATUS,
-  locations
-} from '../../data';
+import { CYCLE_FREQUENCIES, CYCLE_STATUS } from '../../data/callCycles';
 import { formatPercentage, formatDate } from '../../lib/utils';
+
+// Import services
+import { getCallCyclesByTeamLeader, createCallCycle, updateCallCycle, deleteCallCycle } from '../../services/callCyclesService';
+import { getAgentsByTeamLeader } from '../../services/agentsService';
+import { getLocations, searchLocations } from '../../services/locationsService';
 
 const CallCyclesPage = () => {
   const { user } = useAuth();
@@ -86,16 +85,27 @@ const CallCyclesPage = () => {
   const [locationSearchQuery, setLocationSearchQuery] = useState('');
 
   useEffect(() => {
-    if (user) {
-      // In a real app, these would be API calls
-      const teamCallCycles = getCallCyclesByTeamLeader(user.id);
-      const teamAgents = getAgentsByTeamLeader(user.id);
-      
-      setCallCycles(teamCallCycles);
-      setAgents(teamAgents);
-      setAvailableLocations(locations);
-      setLoading(false);
-    }
+    const fetchData = async () => {
+      if (user) {
+        try {
+          // Get data using our services
+          const teamCallCycles = await getCallCyclesByTeamLeader(user.id, user.useRealApi);
+          const teamAgents = await getAgentsByTeamLeader(user.id, user.useRealApi);
+          const locationsList = await getLocations(user.useRealApi);
+          
+          setCallCycles(teamCallCycles);
+          setAgents(teamAgents);
+          setAvailableLocations(locationsList);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          // Handle error state here
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchData();
   }, [user]);
 
   // Filter call cycles based on search query and filters
@@ -114,57 +124,106 @@ const CallCyclesPage = () => {
   const completedCycles = filteredCallCycles.filter(cycle => cycle.status === CYCLE_STATUS.COMPLETED);
 
   // Filter locations based on search query
-  const filteredLocations = availableLocations.filter(location => 
-    location.name.toLowerCase().includes(locationSearchQuery.toLowerCase()) ||
-    location.address.toLowerCase().includes(locationSearchQuery.toLowerCase())
-  );
-
-  const handleCreateCycle = () => {
-    // In a real app, this would be an API call
-    const newId = Math.max(...callCycles.map(c => c.id || 0), 0) + 1;
-    const createdCycle = {
-      ...newCycle,
-      id: newId,
-      assignedBy: user.id,
-      adherenceRate: 0,
-      tenantId: user.tenantId,
-      locations: selectedLocations
+  useEffect(() => {
+    const searchForLocations = async () => {
+      if (locationSearchQuery.trim()) {
+        try {
+          const results = await searchLocations(locationSearchQuery, user?.useRealApi);
+          setAvailableLocations(results);
+        } catch (error) {
+          console.error('Error searching locations:', error);
+        }
+      } else {
+        // If search query is empty, load all locations
+        const allLocations = await getLocations(user?.useRealApi);
+        setAvailableLocations(allLocations);
+      }
     };
     
-    setCallCycles([...callCycles, createdCycle]);
-    setShowCreateDialog(false);
-    setNewCycle({
-      name: '',
-      frequency: CYCLE_FREQUENCIES.WEEKLY,
-      assignedTo: '',
-      locations: [],
-      status: CYCLE_STATUS.PENDING,
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      notes: ''
-    });
-    setSelectedLocations([]);
+    // Debounce the search to avoid too many requests
+    const timeoutId = setTimeout(searchForLocations, 300);
+    
+    return () => clearTimeout(timeoutId);
+  }, [locationSearchQuery, user?.useRealApi]);
+  
+  // Use the available locations directly since we're filtering in the API/service
+  const filteredLocations = availableLocations;
+
+  const handleCreateCycle = async () => {
+    try {
+      // Prepare the data for the API
+      const cycleData = {
+        ...newCycle,
+        assignedBy: user.id,
+        adherenceRate: 0,
+        tenantId: user.tenantId,
+        locations: selectedLocations
+      };
+      
+      // Create the cycle using our service
+      const createdCycle = await createCallCycle(cycleData, user?.useRealApi);
+      
+      // Update the UI
+      setCallCycles([...callCycles, createdCycle]);
+      setShowCreateDialog(false);
+      setNewCycle({
+        name: '',
+        frequency: CYCLE_FREQUENCIES.WEEKLY,
+        assignedTo: '',
+        locations: [],
+        status: CYCLE_STATUS.PENDING,
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        notes: ''
+      });
+      setSelectedLocations([]);
+    } catch (error) {
+      console.error('Error creating call cycle:', error);
+      // Handle error state here
+    }
   };
 
-  const handleEditCycle = () => {
-    // In a real app, this would be an API call
-    const updatedCycles = callCycles.map(cycle => 
-      cycle.id === currentCycle.id ? { ...currentCycle, locations: selectedLocations } : cycle
-    );
-    
-    setCallCycles(updatedCycles);
-    setShowEditDialog(false);
-    setCurrentCycle(null);
-    setSelectedLocations([]);
+  const handleEditCycle = async () => {
+    try {
+      // Prepare the updated cycle data
+      const updatedCycleData = { 
+        ...currentCycle, 
+        locations: selectedLocations 
+      };
+      
+      // Update the cycle using our service
+      await updateCallCycle(currentCycle.id, updatedCycleData, user?.useRealApi);
+      
+      // Update the UI
+      const updatedCycles = callCycles.map(cycle => 
+        cycle.id === currentCycle.id ? { ...updatedCycleData } : cycle
+      );
+      
+      setCallCycles(updatedCycles);
+      setShowEditDialog(false);
+      setCurrentCycle(null);
+      setSelectedLocations([]);
+    } catch (error) {
+      console.error('Error updating call cycle:', error);
+      // Handle error state here
+    }
   };
 
-  const handleDeleteCycle = () => {
-    // In a real app, this would be an API call
-    const updatedCycles = callCycles.filter(cycle => cycle.id !== currentCycle.id);
-    
-    setCallCycles(updatedCycles);
-    setShowDeleteDialog(false);
-    setCurrentCycle(null);
+  const handleDeleteCycle = async () => {
+    try {
+      // Delete the cycle using our service
+      await deleteCallCycle(currentCycle.id, user?.useRealApi);
+      
+      // Update the UI
+      const updatedCycles = callCycles.filter(cycle => cycle.id !== currentCycle.id);
+      
+      setCallCycles(updatedCycles);
+      setShowDeleteDialog(false);
+      setCurrentCycle(null);
+    } catch (error) {
+      console.error('Error deleting call cycle:', error);
+      // Handle error state here
+    }
   };
 
   const handleViewCycle = (cycle) => {
